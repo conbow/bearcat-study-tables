@@ -10,9 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -76,7 +74,13 @@ public class CourseChatActivity extends BaseActivity {
                                             final ChatMessageDTO model) {
                 viewHolder.bind(mUser, model);
             }
+
+            @Override
+            public void onDataChanged() {
+                scrollToBottom();
+            }
         };
+
         mRecyclerView = findViewById(R.id.course_chat_message_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setSmoothScrollbarEnabled(true);
@@ -100,8 +104,8 @@ public class CourseChatActivity extends BaseActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                mBinding.chatMessage.setText("");
                                 scrollToBottom();
-                                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                             } else {
                                 Snackbar.make(view,
                                         getString(R.string.error_sending_message), Snackbar.LENGTH_LONG)
@@ -116,7 +120,6 @@ public class CourseChatActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         mAdapter.startListening();
-        scrollToBottom();
     }
 
     @Override
@@ -127,23 +130,18 @@ public class CourseChatActivity extends BaseActivity {
 
     private static class CourseChatMessageViewHolder extends RecyclerView.ViewHolder {
 
-        private final LinearLayout mChatMessageContainer;
-        private final FrameLayout mChatMessageLeft;
-        private final FrameLayout mChatMessageRight;
-        private final TextView mChatMessage;
+        private final LinearLayout mChatBubble;
+        private final TextView mChatMessageText;
 
         private CourseChatMessageViewHolder(View view) {
             super(view);
-            mChatMessageContainer = view.findViewById(R.id.chat_message_container);
-            mChatMessage = view.findViewById(R.id.chat_message);
-            mChatMessageLeft = view.findViewById(R.id.chat_message_left);
-            mChatMessageRight = view.findViewById(R.id.chat_message_right);
+            mChatBubble = view.findViewById(R.id.chat_bubble);
+            mChatMessageText = view.findViewById(R.id.chat_message_text);
         }
 
         private void bind(UserDTO currentUser, ChatMessageDTO chatMessage) {
             boolean isFromCurrentUser = chatMessage.getFrom().getEmail().equals(currentUser
                     .getEmail());
-
             String userName = chatMessage.getFrom().getName();
             String messagePrefix = !userName.isEmpty() ? userName + ": " : "";
             setChatMessage(isFromCurrentUser, messagePrefix + chatMessage.getMessage());
@@ -152,15 +150,13 @@ public class CourseChatActivity extends BaseActivity {
         private void setChatMessage(boolean isFromCurrentUser, String chatMessage) {
             // Set chat bubble to the left or right
             if (isFromCurrentUser) {
-                mChatMessageContainer.setGravity(Gravity.RIGHT);
-                mChatMessageRight.setVisibility(View.GONE);
+                mChatBubble.setGravity(Gravity.RIGHT);
             } else {
-                mChatMessageContainer.setGravity(Gravity.LEFT);
-                mChatMessageLeft.setVisibility(View.GONE);
+                mChatBubble.setGravity(Gravity.LEFT);
             }
 
             // Set chat bubble text
-            mChatMessage.setText(chatMessage);
+            mChatMessageText.setText(chatMessage);
         }
     }
 }
