@@ -6,7 +6,7 @@ import java.util.Date;
  * Created by connorbowman on 10/3/17.
  */
 
-public class ChatMessage {
+public class ChatMessageDTO {
 
     private int id;
     private UserDTO from;

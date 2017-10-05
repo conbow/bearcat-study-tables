@@ -9,7 +9,7 @@ import java.util.List;
 public class ChatDTO {
 
     private CourseDTO course;
-    private List<ChatMessage> messages;
+    private List<ChatMessageDTO> messages;
 
     public CourseDTO getCourse() {
         return course;
@@ -19,11 +19,11 @@ public class ChatDTO {
         this.course = course;
     }
 
-    public List<ChatMessage> getMessages() {
+    public List<ChatMessageDTO> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<ChatMessage> messages) {
+    public void setMessages(List<ChatMessageDTO> messages) {
         this.messages = messages;
     }
 }

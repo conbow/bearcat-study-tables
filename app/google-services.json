@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "103092473167",
+    "firebase_url": "https://bearcatstudytables.firebaseio.com",
+    "project_id": "bearcatstudytables",
+    "storage_bucket": "bearcatstudytables.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103092473167:android:ac3eed10601c0fe5",
+        "android_client_info": {
+          "package_name": "edu.uc.bearcatstudytables"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "103092473167-crn66jp4gvk6q6p1bjrql53u8hu8m5r9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.uc.bearcatstudytables",
+            "certificate_hash": "72144e41cd1809a2da93757213198f6b4136eab9"
+          }
+        },
+        {
+          "client_id": "103092473167-5uvvpg7c8091qnkb5rosqb203taha76a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxum9E6kEnJoWYUVnSjSnXOuDKwtUnTF4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "103092473167-5uvvpg7c8091qnkb5rosqb203taha76a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

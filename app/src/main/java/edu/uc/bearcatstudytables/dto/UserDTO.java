@@ -6,17 +6,21 @@ package edu.uc.bearcatstudytables.dto;
 
 public class UserDTO {
 
-    private int id;
+    private String id;
     private String email;
-    private String nameFirst;
-    private String nameLast;
+    private String name;
     private String password;
 
-    public int getId() {
+    public UserDTO() {
+        this.email = "";
+        this.password = "";
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -28,20 +32,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getNameFirst() {
-        return nameFirst;
+    public String getName() {
+        return name;
     }
 
-    public void setNameFirst(String nameFirst) {
-        this.nameFirst = nameFirst;
-    }
-
-    public String getNameLast() {
-        return nameLast;
-    }
-
-    public void setNameLast(String nameLast) {
-        this.nameLast = nameLast;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPassword() {
