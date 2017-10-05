@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class ChatMessageDTO {
 
-    private int id;
+    private String courseId;
     private UserDTO from;
     private String message;
     private Date date;
@@ -17,12 +17,12 @@ public class ChatMessageDTO {
         this.message = "";
     }
 
-    public int getId() {
-        return id;
+    public String getCourseId() {
+        return courseId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
     }
 
     public UserDTO getFrom() {

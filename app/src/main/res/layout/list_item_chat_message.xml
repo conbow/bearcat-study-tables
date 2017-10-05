@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat_message_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_margin"
-    android:paddingRight="@dimen/activity_margin">
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:id="@+id/chat_message_left"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/chat_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
         android:layout_marginBottom="4dp"
         android:layout_marginTop="4dp"
-        android:layout_marginLeft="20dp"
         android:background="@drawable/chat_bubble"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp"
         tools:text="Hello" />
+
+    <FrameLayout
+        android:id="@+id/chat_message_right"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

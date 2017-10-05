@@ -14,6 +14,7 @@ public class UserDTO {
     public UserDTO() {
         this.email = "";
         this.password = "";
+        this.name = "";
     }
 
     public String getId() {

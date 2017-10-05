@@ -4,13 +4,15 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -20,9 +22,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.util.Date;
+
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.databinding.ActivityCourseChatBinding;
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
+import edu.uc.bearcatstudytables.dto.UserDTO;
 
 public class CourseChatActivity extends BaseActivity {
 
@@ -34,6 +39,7 @@ public class CourseChatActivity extends BaseActivity {
     private String mCourseId;
     private ActivityCourseChatBinding mBinding;
     private ChatMessageDTO mChatMessage;
+    private RecyclerView mRecyclerView;
     private FirebaseRecyclerAdapter mAdapter;
 
     @Override
@@ -43,16 +49,14 @@ public class CourseChatActivity extends BaseActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_course_chat);
         mChatMessage = new ChatMessageDTO();
         mBinding.setChatMessage(mChatMessage);
-
         mCourseId = getIntent().getStringExtra(KEY_COURSE_ID);
-
         initializeChatMessageList();
     }
 
     private void initializeChatMessageList() {
         Query query = FirebaseDatabase.getInstance()
                 .getReference()
-                .child("course-chat")
+                .child("course-chat/" + mCourseId)
                 .limitToLast(50);
 
         FirebaseRecyclerOptions<ChatMessageDTO> options =
@@ -70,46 +74,49 @@ public class CourseChatActivity extends BaseActivity {
             @Override
             protected void onBindViewHolder(CourseChatMessageViewHolder viewHolder, int position,
                                             final ChatMessageDTO model) {
-                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                    }
-                });
-                viewHolder.bind(model);
+                viewHolder.bind(mUser, model);
             }
         };
-        RecyclerView recyclerView = findViewById(R.id.course_chat_message_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView = findViewById(R.id.course_chat_message_list);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setSmoothScrollbarEnabled(true);
+        linearLayoutManager.setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void scrollToBottom() {
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
 
     public void onSendMessageButtonClick(final View view) {
-        // Check input validation and attempt to create course
+        // Check input validation and attempt to send message
         if (!mChatMessage.getMessage().isEmpty()) {
-            mDatabase.getReference().child("course-chat").push().setValue(mChatMessage)
+            mChatMessage.setDate(new Date());
+            mChatMessage.setCourseId(mCourseId);
+            mChatMessage.setFrom(mUser);
+            mDatabase.getReference().child("course-chat/" + mCourseId).push().setValue(mChatMessage)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                mBinding.chatMessage.setText("");
+                                scrollToBottom();
+                                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                             } else {
                                 Snackbar.make(view,
-                                        getString(R.string.error_course_create), Snackbar.LENGTH_LONG)
+                                        getString(R.string.error_sending_message), Snackbar.LENGTH_LONG)
                                         .show();
                             }
                         }
                     });
-        } else {
-            Log.d(TAG, "error sending chat message");
         }
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         mAdapter.startListening();
+        scrollToBottom();
     }
 
     @Override
@@ -120,27 +127,39 @@ public class CourseChatActivity extends BaseActivity {
 
     private static class CourseChatMessageViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView mUserName;
+        private final LinearLayout mChatMessageContainer;
+        private final FrameLayout mChatMessageLeft;
+        private final FrameLayout mChatMessageRight;
         private final TextView mChatMessage;
 
         private CourseChatMessageViewHolder(View view) {
             super(view);
-            mUserName = view.findViewById(R.id.chat_message);
-            //mUserName = view.findViewById(R.id.from_name);
+            mChatMessageContainer = view.findViewById(R.id.chat_message_container);
             mChatMessage = view.findViewById(R.id.chat_message);
+            mChatMessageLeft = view.findViewById(R.id.chat_message_left);
+            mChatMessageRight = view.findViewById(R.id.chat_message_right);
         }
 
-        private void bind(ChatMessageDTO chatMessage) {
-            //setUserName(chatMessage.getFrom().getEmail());
-            setUserName("test");
-            setChatMessage(chatMessage.getMessage());
+        private void bind(UserDTO currentUser, ChatMessageDTO chatMessage) {
+            boolean isFromCurrentUser = chatMessage.getFrom().getEmail().equals(currentUser
+                    .getEmail());
+
+            String userName = chatMessage.getFrom().getName();
+            String messagePrefix = !userName.isEmpty() ? userName + ": " : "";
+            setChatMessage(isFromCurrentUser, messagePrefix + chatMessage.getMessage());
         }
 
-        private void setUserName(String userName) {
-            mUserName.setText(userName);
-        }
+        private void setChatMessage(boolean isFromCurrentUser, String chatMessage) {
+            // Set chat bubble to the left or right
+            if (isFromCurrentUser) {
+                mChatMessageContainer.setGravity(Gravity.RIGHT);
+                mChatMessageRight.setVisibility(View.GONE);
+            } else {
+                mChatMessageContainer.setGravity(Gravity.LEFT);
+                mChatMessageLeft.setVisibility(View.GONE);
+            }
 
-        private void setChatMessage(String chatMessage) {
+            // Set chat bubble text
             mChatMessage.setText(chatMessage);
         }
     }

@@ -10,6 +10,8 @@ import android.view.View;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.databinding.ActivitySignUpBinding;
@@ -39,6 +41,7 @@ public class SignUpActivity extends BaseActivity {
     }
 
     public void onSignUpButtonClick(final View view) {
+        final String name =  mUser.getName();
         String email = mUser.getEmail();
         String password = mUser.getPassword();
 
@@ -60,6 +63,11 @@ public class SignUpActivity extends BaseActivity {
             mBinding.email.setError(getString(R.string.error_invalid_email));
             focusView = mBinding.email;
         }
+        // Name
+        if (name.isEmpty()) {
+            mBinding.name.setError(getString(R.string.error_field_required));
+            focusView = mBinding.name;
+        }
 
         // Check input validation and attempt sign up
         if (focusView != null) {
@@ -72,6 +80,9 @@ public class SignUpActivity extends BaseActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(name).build();
+                                FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates);
                                 setResult(RESULT_OK);
                                 finish();
                             } else {

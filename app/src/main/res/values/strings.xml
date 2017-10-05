@@ -18,6 +18,7 @@
     <string name="action_sign_up">Sign Up</string>
     <string name="action_sign_up_prompt">Don\'t have an account? Sign Up</string>
     <string name="action_add_course">Add Course</string>
+    <string name="action_send">Send</string>
     <string name="error_incorrect_login">Incorrect login information</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
@@ -25,6 +26,8 @@
     <string name="error_field_required">This field is required</string>
     <string name="error_sign_up">Unable to create account</string>
     <string name="error_course_create">Unable to create course</string>
+    <string name="error_sending_message">Unable to send message</string>
+    <string name="error_unknown">An unknown error has occurred</string>
     <string name="success_login">Login successful</string>
     <string name="success_sign_up">Account created successfully</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email

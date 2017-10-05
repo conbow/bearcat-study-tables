@@ -13,6 +13,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -91,12 +92,14 @@ public class CoursesActivity extends BaseActivity
             }
 
             @Override
-            protected void onBindViewHolder(CourseViewHolder viewHolder, int position, final CourseDTO model) {
+            protected void onBindViewHolder(final CourseViewHolder viewHolder, int position, final CourseDTO model) {
                 viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(CoursesActivity.this, CourseChatActivity.class);
-                        intent.putExtra(CourseChatActivity.KEY_COURSE_ID, model.getUid());
+                        Log.d(TAG, "itemId: " + model.getUid());
+                        intent.putExtra(CourseChatActivity.KEY_COURSE_ID, mAdapter.getRef(viewHolder
+                                .getAdapterPosition()).getKey());
                         intent.putExtra(CourseChatActivity.KEY_COURSE_NAME, model.getName());
                         startActivity(intent);
                     }
