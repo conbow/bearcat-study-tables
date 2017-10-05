@@ -8,7 +8,7 @@
             android:title="@string/courses" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="@string/user">
         <menu>
             <item
                 android:id="@+id/nav_logout"

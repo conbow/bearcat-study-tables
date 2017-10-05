@@ -24,6 +24,8 @@
             android:name=".activity.CoursesActivity"
             android:label="@string/courses"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".activity.CourseAddActivity" />
+        <activity android:name=".activity.CourseChatActivity"></activity>
     </application>
 
 </manifest>

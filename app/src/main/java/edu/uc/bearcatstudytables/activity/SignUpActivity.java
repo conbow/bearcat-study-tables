@@ -61,7 +61,7 @@ public class SignUpActivity extends BaseActivity {
             focusView = mBinding.email;
         }
 
-        // Check input validation and attempt login
+        // Check input validation and attempt sign up
         if (focusView != null) {
             focusView.requestFocus();
         } else {

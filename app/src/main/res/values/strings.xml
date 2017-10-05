@@ -10,16 +10,21 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
+    <string name="prompt_name">Name</string>
+    <string name="prompt_description">Description</string>
+    <string name="prompt_message">Message</string>
     <string name="action_login">Login</string>
     <string name="action_logout">Logout</string>
     <string name="action_sign_up">Sign Up</string>
     <string name="action_sign_up_prompt">Don\'t have an account? Sign Up</string>
+    <string name="action_add_course">Add Course</string>
     <string name="error_incorrect_login">Incorrect login information</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_sign_up">Unable to create account</string>
+    <string name="error_course_create">Unable to create course</string>
     <string name="success_login">Login successful</string>
     <string name="success_sign_up">Account created successfully</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
@@ -34,13 +39,9 @@
     <string name="students">Students</string>
     <string name="instructor">Instructor</string>
     <string name="faculty">Faculty</string>
-    <string name="title_item_list">Items</string>
-    <string name="title_item_detail">Item Detail</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
-    <string name="title_activity_courses">CoursesActivity</string>
-    <string name="title_activity_login2">Sign in</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
 
     <string name="feedback_no_courses">No Courses</string>
+    <string name="feedback_course_created">Course created</string>
 </resources>

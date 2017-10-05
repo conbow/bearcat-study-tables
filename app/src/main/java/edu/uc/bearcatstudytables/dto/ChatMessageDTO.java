@@ -13,6 +13,10 @@ public class ChatMessageDTO {
     private String message;
     private Date date;
 
+    public ChatMessageDTO() {
+        this.message = "";
+    }
+
     public int getId() {
         return id;
     }

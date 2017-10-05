@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
@@ -17,11 +18,13 @@ public class BaseActivity extends AppCompatActivity {
 
     protected UserDTO mUser;
     protected FirebaseAuth mAuth;
+    protected FirebaseDatabase mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
 
         if (mAuth.getCurrentUser() != null) {
             FirebaseUser firebaseUser = mAuth.getCurrentUser();
