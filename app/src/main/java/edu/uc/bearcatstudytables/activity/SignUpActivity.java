@@ -15,9 +15,8 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.databinding.ActivitySignUpBinding;
-import edu.uc.bearcatstudytables.dto.UserDTO;
 import edu.uc.bearcatstudytables.util.ValidationUtil;
-import edu.uc.bearcatstudytables.viewmodel.SingleTaskViewModel;
+import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
 
 public class SignUpActivity extends BaseActivity {
 
@@ -25,25 +24,21 @@ public class SignUpActivity extends BaseActivity {
     private static final String TAG = "SignUpActivity";
 
     private ActivitySignUpBinding mBinding;
-    private SingleTaskViewModel mViewModel;
+    private AuthViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getString(R.string.action_sign_up));
+        mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up);
-
-        mUser = new UserDTO();
-        mBinding.setUser(mUser);
-
-        mViewModel = ViewModelProviders.of(this).get(SingleTaskViewModel.class);
         mBinding.setViewModel(mViewModel);
     }
 
     public void onSignUpButtonClick(final View view) {
-        final String name =  mUser.getName();
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        final String name = mViewModel.getUser().getName();
+        String email = mViewModel.getUser().getEmail();
+        String password = mViewModel.getUser().getPassword();
 
         // Input validation
         View focusView = null;

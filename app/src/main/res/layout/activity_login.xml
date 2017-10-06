@@ -7,12 +7,8 @@
         <import type="android.view.View" />
 
         <variable
-            name="user"
-            type="edu.uc.bearcatstudytables.dto.UserDTO" />
-
-        <variable
             name="viewModel"
-            type="edu.uc.bearcatstudytables.viewmodel.SingleTaskViewModel" />
+            type="edu.uc.bearcatstudytables.viewmodel.AuthViewModel" />
     </data>
 
     <android.support.design.widget.CoordinatorLayout
@@ -46,7 +42,7 @@
                         android:inputType="textEmailAddress"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@={user.email}" />
+                        android:text="@={viewModel.user.email}" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -63,7 +59,7 @@
                         android:inputType="textPassword"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@={user.password}" />
+                        android:text="@={viewModel.user.password}" />
 
                 </android.support.design.widget.TextInputLayout>
 

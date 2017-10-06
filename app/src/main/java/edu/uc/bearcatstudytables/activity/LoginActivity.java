@@ -14,9 +14,8 @@ import com.google.firebase.auth.AuthResult;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.databinding.ActivityLoginBinding;
-import edu.uc.bearcatstudytables.dto.UserDTO;
 import edu.uc.bearcatstudytables.util.ValidationUtil;
-import edu.uc.bearcatstudytables.viewmodel.SingleTaskViewModel;
+import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
 
 /**
  * Created by connorbowman on 10/4/17.
@@ -27,23 +26,19 @@ public class LoginActivity extends BaseActivity {
     private static final String TAG = "LoginActivity";
 
     private ActivityLoginBinding mBinding;
-    private SingleTaskViewModel mViewModel;
+    private AuthViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
-
-        mUser = new UserDTO();
-        mBinding.setUser(mUser);
-
-        mViewModel = ViewModelProviders.of(this).get(SingleTaskViewModel.class);
         mBinding.setViewModel(mViewModel);
     }
 
     public void onLoginButtonClick(final View view) {
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        String email = mViewModel.getUser().getEmail();
+        String password = mViewModel.getUser().getPassword();
 
         // Input validation
         View focusView = null;
