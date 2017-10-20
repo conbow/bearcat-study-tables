@@ -15,7 +15,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activity.CourseChatActivity">
+        tools:context=".activity.ChatActivity">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="@string/prompt_message"
-                    android:imeOptions="actionSend"
+                    android:imeOptions="actionSend|flagNoExtractUi"
                     android:inputType="text"
                     android:maxLines="1"
                     android:singleLine="true"

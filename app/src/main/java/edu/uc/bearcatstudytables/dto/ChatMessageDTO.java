@@ -1,11 +1,14 @@
 package edu.uc.bearcatstudytables.dto;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
 import java.util.Date;
 
 /**
  * Created by connorbowman on 10/3/17.
  */
 
+@IgnoreExtraProperties
 public class ChatMessageDTO {
 
     private String courseId;

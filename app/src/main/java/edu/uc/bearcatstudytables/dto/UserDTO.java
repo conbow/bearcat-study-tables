@@ -1,20 +1,31 @@
 package edu.uc.bearcatstudytables.dto;
 
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
+
 /**
  * Created by connorbowman on 10/3/17.
  */
 
+@IgnoreExtraProperties
 public class UserDTO {
+
+    public enum types {STUDENT, INSTRUCTOR}
 
     private String id;
     private String email;
     private String name;
     private String password;
+    private String photoUrl;
+    private String type;
 
     public UserDTO() {
-        this.email = "";
-        this.password = "";
-        this.name = "";
+        id = "";
+        email = "";
+        name = "";
+        password = "";
+        photoUrl = "";
+        type = "";
     }
 
     public String getId() {
@@ -41,11 +52,40 @@ public class UserDTO {
         this.name = name;
     }
 
+    @Exclude
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof UserDTO) {
+            UserDTO user = (UserDTO) obj;
+            return (id == null || id.equals(user.getId())
+                    && (email == null || email.equals(user.getEmail()))
+                    && (name == null || name.equals(user.getName()))
+                    && (photoUrl == null || photoUrl.equals(user.getPhotoUrl())));
+        }
+        return super.equals(obj);
     }
 }

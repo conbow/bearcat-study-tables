@@ -12,8 +12,8 @@ public class MainActivity extends BaseActivity {
         // Upon app opening we direct the user to either the login screen or the course list screen,
         // depending on if the user is authenticated already or not
         Class intentClass;
-        if (mUser != null) {
-            intentClass = CoursesActivity.class;
+        if (mCurrentUser != null) {
+            intentClass = UserActivity.class;
         } else {
             intentClass = LoginActivity.class;
         }

@@ -3,58 +3,61 @@ package edu.uc.bearcatstudytables.activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
-import edu.uc.bearcatstudytables.databinding.ActivityLoginBinding;
+import edu.uc.bearcatstudytables.databinding.ActivityProfileBinding;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 import edu.uc.bearcatstudytables.util.ValidationUtil;
 import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
 
-/**
- * Created by connorbowman on 10/4/17.
- */
+public class ProfileActivity extends BaseActivity {
 
-public class LoginActivity extends BaseActivity {
+    private static final String TAG = "ProfileActivity";
 
-    private static final String TAG = "LoginActivity";
+    public static final int REQUEST_CODE = 3;
+    public static final int REQUEST_IMAGE_CAPTURE = 5;
 
-    private ActivityLoginBinding mBinding;
+    private ActivityProfileBinding mBinding;
     private AuthViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(R.string.action_profile);
 
         // Setup ViewModel for retaining data on configuration changes
         mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
+        mViewModel.setUser(mUserService.getCurrentUser());
 
         // Setup data binding and set ViewModel
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up);
         mBinding.setViewModel(mViewModel);
+
+        /*
+        mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
+
+        // Bind existing user info to view model, include password in case it changes
+        mUser.setPassword(mViewModel.getUser().getPassword());
+        mViewModel.setUser(mUser);
+
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
+        mBinding.setViewModel(mViewModel);*/
     }
 
-    /**
-     * Login button click handler
-     * Validates input and sends data to service
-     *
-     * @param view View
-     */
-    public void onLoginButtonClick(final View view) {
+    public void onUpdateProfileButtonClick(final View view) {
         final UserDTO inputUser = mViewModel.getUser();
 
         // Input validation
         View focusView = null;
         // Password
-        if (inputUser.getPassword().isEmpty()) {
-            mBinding.password.setError(getString(R.string.error_field_required));
-            focusView = mBinding.password;
-        } else if (!ValidationUtil.isValidPassword(inputUser.getPassword())) {
+        if (!inputUser.getPassword().isEmpty() && !ValidationUtil.isValidPassword(inputUser
+                .getPassword())) {
             mBinding.password.setError(getString(R.string.error_invalid_password));
             focusView = mBinding.password;
         }
@@ -66,13 +69,18 @@ public class LoginActivity extends BaseActivity {
             mBinding.email.setError(getString(R.string.error_invalid_email));
             focusView = mBinding.email;
         }
+        // Name
+        if (inputUser.getName().isEmpty()) {
+            mBinding.name.setError(getString(R.string.error_field_required));
+            focusView = mBinding.name;
+        }
 
-        // Check input validation and attempt login
+        // Check input validation and attempt profile update
         if (focusView != null) {
             focusView.requestFocus();
         } else {
 
-            mUserService.login(inputUser, new IDataAccess.TaskCallback() {
+            mUserService.updateProfile(mViewModel.getUser(), new IDataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
                     mViewModel.setIsLoading(true);
@@ -85,8 +93,9 @@ public class LoginActivity extends BaseActivity {
 
                 @Override
                 public void onSuccess() {
-                    // We don't need to do anything, login will automatically log the user in
-                    // and then our auth listener will redirect the user to new activity
+                    // Show success message
+                    Snackbar.make(view, R.string.success_profile_update, Snackbar.LENGTH_LONG)
+                            .show();
                 }
 
                 @Override
@@ -98,39 +107,23 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
-    public void onSignUpButtonClick(View view) {
-        Intent intent = new Intent(this, SignUpActivity.class);
-        startActivity(intent);
+    public void onProfilePhotoChangeButtonClick(View view) {
+        dispatchTakePictureIntent();
     }
 
-    public void onForgotPasswordClick() {
-        Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-        startActivityForResult(intent, ForgotPasswordActivity.REQUEST_CODE);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.login, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_forgot_password) {
-            onForgotPasswordClick();
-            return true;
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ForgotPasswordActivity.REQUEST_CODE && resultCode == RESULT_OK) {
-            Snackbar.make(findViewById(R.id.main_container), R.string.success_reset_password,
-                    Snackbar.LENGTH_LONG).show();
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            mBinding.profilePhoto.setImageBitmap(imageBitmap);
         }
     }
 }

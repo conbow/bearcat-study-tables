@@ -8,63 +8,44 @@ import android.view.View;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
-import edu.uc.bearcatstudytables.databinding.ActivitySignUpBinding;
+import edu.uc.bearcatstudytables.databinding.ActivityForgotPasswordBinding;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 import edu.uc.bearcatstudytables.util.ValidationUtil;
 import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
 
-public class SignUpActivity extends BaseActivity {
+public class ForgotPasswordActivity extends BaseActivity {
 
-    private static final String TAG = "SignUpActivity";
+    private static final String TAG = "ForgotPasswordActivity";
 
-    private ActivitySignUpBinding mBinding;
+    public static final int REQUEST_CODE = 2;
+
+    private ActivityForgotPasswordBinding mBinding;
     private AuthViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(R.string.action_sign_up);
+        setTitle(R.string.action_forgot_password);
 
         // Setup ViewModel for retaining data on configuration changes
         mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
 
         // Setup data binding and set ViewModel
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_sign_up);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_forgot_password);
         mBinding.setViewModel(mViewModel);
     }
 
     /**
-     * Signup button click handler
+     * Forgot password button click handler
      * Validates input and sends data to service
      *
      * @param view View
      */
-    public void onSignUpButtonClick(final View view) {
+    public void onPasswordResetButtonClick(final View view) {
         final UserDTO inputUser = mViewModel.getUser();
 
         // Input validation
         View focusView = null;
-        // Password Repeat
-        String passwordRepeat = mBinding.passwordRepeat.getText().toString();
-        if (passwordRepeat.isEmpty()) {
-            mBinding.passwordRepeat.setError(getString(R.string.error_field_required));
-            focusView = mBinding.passwordRepeat;
-        } else if (!ValidationUtil.isValidPassword(passwordRepeat)) {
-            mBinding.passwordRepeat.setError(getString(R.string.error_invalid_password));
-            focusView = mBinding.passwordRepeat;
-        } else if (!passwordRepeat.equals(inputUser.getPassword())) {
-            mBinding.password.setError(getString(R.string.error_passwords_must_match));
-            mBinding.passwordRepeat.setError(getString(R.string.error_passwords_must_match));
-            focusView = mBinding.password;
-        }
-        // Password
-        if (inputUser.getPassword().isEmpty()) {
-            mBinding.password.setError(getString(R.string.error_field_required));
-            focusView = mBinding.password;
-        } else if (!ValidationUtil.isValidPassword(inputUser.getPassword())) {
-            mBinding.password.setError(getString(R.string.error_invalid_password));
-            focusView = mBinding.password;
-        }
         // Email
         if (inputUser.getEmail().isEmpty()) {
             mBinding.email.setError(getString(R.string.error_field_required));
@@ -73,18 +54,13 @@ public class SignUpActivity extends BaseActivity {
             mBinding.email.setError(getString(R.string.error_invalid_email));
             focusView = mBinding.email;
         }
-        // Name
-        if (inputUser.getName().isEmpty()) {
-            mBinding.name.setError(getString(R.string.error_field_required));
-            focusView = mBinding.name;
-        }
 
-        // Check input validation and attempt sign up
+        // Check input validation and attempt password reset
         if (focusView != null) {
             focusView.requestFocus();
         } else {
 
-            mUserService.signUp(inputUser, new IDataAccess.TaskCallback() {
+            mUserService.resetPassword(inputUser, new IDataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
                     mViewModel.setIsLoading(true);
@@ -97,8 +73,8 @@ public class SignUpActivity extends BaseActivity {
 
                 @Override
                 public void onSuccess() {
-                    // We don't need to do anything, signup will automatically log the user in
-                    // and then our auth listener will redirect the user to new activity
+                    setResult(RESULT_OK);
+                    finish();
                 }
 
                 @Override

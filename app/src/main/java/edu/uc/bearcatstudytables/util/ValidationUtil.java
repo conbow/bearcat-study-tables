@@ -13,6 +13,10 @@ public class ValidationUtil {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
+    public static boolean isUCEmail(String email) {
+        return email.endsWith("uc.edu") || email.endsWith("mail.uc.edu");
+    }
+
     public static boolean isValidPassword(String password) {
         return password.length() >= 8;
     }

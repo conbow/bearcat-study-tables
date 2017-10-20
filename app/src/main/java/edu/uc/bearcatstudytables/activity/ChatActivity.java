@@ -2,7 +2,6 @@ package edu.uc.bearcatstudytables.activity;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,27 +14,26 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import java.util.Date;
 
 import edu.uc.bearcatstudytables.R;
-import edu.uc.bearcatstudytables.databinding.ActivityCourseChatBinding;
+import edu.uc.bearcatstudytables.dao.ChatMessageDAO;
+import edu.uc.bearcatstudytables.dao.IDataAccess;
+import edu.uc.bearcatstudytables.databinding.ActivityChatBinding;
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
-public class CourseChatActivity extends BaseActivity {
+public class ChatActivity extends BaseActivity {
 
-    private static final String TAG = "CourseChatActivity";
+    private static final String TAG = "ChatActivity";
 
-    public final static String KEY_COURSE_ID = "COURSE_ID";
-    public final static String KEY_COURSE_NAME = "COURSE_NAME";
+    public final static String KEY_CHAT_ID = "CHAT_ID";
+    public final static String KEY_CHAT_NAME = "CHAT_NAME";
 
     private String mCourseId;
-    private ActivityCourseChatBinding mBinding;
+    private ActivityChatBinding mBinding;
     private ChatMessageDTO mChatMessage;
     private RecyclerView mRecyclerView;
     private FirebaseRecyclerAdapter mAdapter;
@@ -43,19 +41,17 @@ public class CourseChatActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(getIntent().getStringExtra(KEY_COURSE_NAME));
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_course_chat);
+        setTitle(getIntent().getStringExtra(KEY_CHAT_NAME));
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_chat);
         mChatMessage = new ChatMessageDTO();
         mBinding.setChatMessage(mChatMessage);
-        mCourseId = getIntent().getStringExtra(KEY_COURSE_ID);
+        mCourseId = getIntent().getStringExtra(KEY_CHAT_ID);
         initializeChatMessageList();
     }
 
     private void initializeChatMessageList() {
-        Query query = FirebaseDatabase.getInstance()
-                .getReference()
-                .child("course-chat/" + mCourseId)
-                .limitToLast(50);
+
+        Query query = ChatMessageDAO.getReference(mCourseId).limitToLast(50);
 
         FirebaseRecyclerOptions<ChatMessageDTO> options =
                 new FirebaseRecyclerOptions.Builder<ChatMessageDTO>()
@@ -72,7 +68,7 @@ public class CourseChatActivity extends BaseActivity {
             @Override
             protected void onBindViewHolder(CourseChatMessageViewHolder viewHolder, int position,
                                             final ChatMessageDTO model) {
-                viewHolder.bind(mUser, model);
+                viewHolder.bind(mCurrentUser, model);
             }
 
             @Override
@@ -90,7 +86,7 @@ public class CourseChatActivity extends BaseActivity {
     }
 
     private void scrollToBottom() {
-        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
     }
 
     public void onSendMessageButtonClick(final View view) {
@@ -98,32 +94,44 @@ public class CourseChatActivity extends BaseActivity {
         if (!mChatMessage.getMessage().isEmpty()) {
             mChatMessage.setDate(new Date());
             mChatMessage.setCourseId(mCourseId);
-            mChatMessage.setFrom(mUser);
-            mDatabase.getReference().child("course-chat/" + mCourseId).push().setValue(mChatMessage)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                mBinding.chatMessage.setText("");
-                                scrollToBottom();
-                            } else {
-                                Snackbar.make(view,
-                                        getString(R.string.error_sending_message), Snackbar.LENGTH_LONG)
-                                        .show();
-                            }
-                        }
-                    });
+            mChatMessage.setFrom(mCurrentUser);
+
+            mChatService.sendMessage(mCourseId, mChatMessage, new IDataAccess.TaskCallback() {
+                @Override
+                public void onStart() {
+
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+
+                @Override
+                public void onSuccess() {
+                    mBinding.chatMessage.setText("");
+                    // I shouldn't have to do this, the adapter's onDataChanged fn should be
+                    // called, right? But it's not
+                    scrollToBottom();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    // Show error message
+                    Snackbar.make(view, e.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                }
+            });
         }
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         mAdapter.startListening();
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         mAdapter.stopListening();
     }

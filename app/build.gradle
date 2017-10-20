@@ -2,10 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.0'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "edu.uc.bearcatstudytables"
-        minSdkVersion 19
+        minSdkVersion 14
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -32,15 +32,14 @@ dependencies {
     compile 'com.google.firebase:firebase-core:11.4.2'
     compile 'com.google.firebase:firebase-auth:11.4.2'
     compile 'com.google.firebase:firebase-database:11.4.2'
+    compile 'com.google.firebase:firebase-storage:11.4.2'
     compile 'com.firebaseui:firebase-ui-database:3.0.0'
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
-    compile 'android.arch.lifecycle:extensions:1.0.0-beta1'
+    compile 'android.arch.lifecycle:extensions:1.0.0-alpha9-1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     testCompile 'junit:junit:4.12'
-    annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-beta1'
+    annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-alpha9-1'
 }
-
-
-
 
 apply plugin: 'com.google.gms.google-services'
