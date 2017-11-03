@@ -9,6 +9,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import edu.uc.bearcatstudytables.dto.ChatDTO;
+import edu.uc.bearcatstudytables.dto.UserDTO;
+
+import static android.R.attr.type;
 
 /**
  * Created by connorbowman on 10/19/17.
@@ -17,16 +20,22 @@ import edu.uc.bearcatstudytables.dto.ChatDTO;
 public class ChatDAO implements IChatDAO {
 
     public static DatabaseReference getReference() {
-        return FirebaseDatabase.getInstance().getReference().child("chat").child("list");
+        return FirebaseDatabase.getInstance().getReference().child("chat");
     }
 
-    public static DatabaseReference getReferenceForId(String chatId) {
+    public static DatabaseReference getReferenceForType(ChatDTO.types type) {
+        return FirebaseDatabase.getInstance().getReference().child("chat").child(type.name()
+                .toLowerCase());
+    }
+
+    public static DatabaseReference getReferenceForId(ChatDTO.types type, String chatId) {
         return getReference().child(chatId);
     }
 
-    public static Query getQueryForType(String type) {
-        return getReference().orderByChild("type").equalTo(type);
-    }
+    /*
+    public static Query getQueryForType(UserDTO.types type) {
+        return getReference(type).orderByChild("type").equalTo(type);
+    }*/
 
     /**
      * Create a new chat (course or group)
@@ -37,7 +46,7 @@ public class ChatDAO implements IChatDAO {
     @Override
     public void create(ChatDTO chat, final TaskCallback callback) {
         callback.onStart();
-        getReference().push().setValue(chat)
+        getReferenceForType(ChatDTO.types.valueOf(chat.getType())).push().setValue(chat)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

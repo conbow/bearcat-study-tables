@@ -7,14 +7,14 @@
 
         <variable
             name="viewModel"
-            type="edu.uc.bearcatstudytables.viewmodel.AuthViewModel" />
+            type="edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel" />
 
     </data>
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activity.SignUpActivity">
+        tools:context=".ui.activity.SignUpActivity">
 
         <ScrollView
             android:layout_width="match_parent"

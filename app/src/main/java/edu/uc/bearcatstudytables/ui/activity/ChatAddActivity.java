@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -24,7 +24,7 @@ import edu.uc.bearcatstudytables.dao.UserDAO;
 import edu.uc.bearcatstudytables.databinding.ActivityChatAddBinding;
 import edu.uc.bearcatstudytables.dto.ChatDTO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-import edu.uc.bearcatstudytables.viewmodel.ChatViewModel;
+import edu.uc.bearcatstudytables.ui.viewmodel.ChatViewModel;
 
 public class ChatAddActivity extends BaseActivity {
 

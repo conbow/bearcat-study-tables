@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.content.Intent;
 import android.databinding.ObservableField;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 
 import edu.uc.bearcatstudytables.BR;
 import edu.uc.bearcatstudytables.dto.UserDTO;
@@ -22,18 +23,18 @@ public class BaseActivity extends AppCompatActivity implements IUserService.Auth
 
     protected IUserService mUserService;
     protected IChatService mChatService;
-    protected UserDTO mCurrentUser;
-    protected final ObservableField<UserDTO> mCurrentUserObservable = new ObservableField<>();
+    protected final ObservableField<UserDTO> mCurrentUser = new ObservableField<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set service instances and current user variable for convenience
+        // Set service instances
         mUserService = new UserService(this);
         mChatService = new ChatService();
-        mCurrentUser = mUserService.getCurrentUser();
-        mCurrentUserObservable.set(mCurrentUser);
+
+        // Set observable for current user
+        mCurrentUser.set(mUserService.getCurrentUser());
 
         // Set toolbar back button arrow if not a root activity
         // OR if not LoginActivity (workaround for older API's that have issues with isTaskRoot)
@@ -42,6 +43,9 @@ public class BaseActivity extends AppCompatActivity implements IUserService.Auth
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
+
+        // Fix for vectors on older API's
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
     @Override
@@ -83,7 +87,10 @@ public class BaseActivity extends AppCompatActivity implements IUserService.Auth
         }
 
         // Set current user observable and notify observers
-        mCurrentUserObservable.set(user);
-        mCurrentUserObservable.notifyPropertyChanged(BR._all);
+        mCurrentUser.set(user);
+        synchronized (mCurrentUser) {
+            mCurrentUser.notifyAll();
+        }
+        mCurrentUser.notifyPropertyChanged(BR._all);
     }
 }

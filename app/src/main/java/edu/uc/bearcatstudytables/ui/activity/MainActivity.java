@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,7 @@ public class MainActivity extends BaseActivity {
         // Upon app opening we direct the user to either the login screen or the course list screen,
         // depending on if the user is authenticated already or not
         Class intentClass;
-        if (mCurrentUser != null) {
+        if (mCurrentUser.get() != null) {
             intentClass = UserActivity.class;
         } else {
             intentClass = LoginActivity.class;

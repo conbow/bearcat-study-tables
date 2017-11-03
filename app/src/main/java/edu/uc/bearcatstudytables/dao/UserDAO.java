@@ -11,6 +11,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +30,12 @@ public class UserDAO implements IUserDAO {
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
+    private FirebaseStorage mStorage;
 
     public UserDAO() {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
+        mStorage = FirebaseStorage.getInstance();
     }
 
     /**
@@ -40,9 +45,8 @@ public class UserDAO implements IUserDAO {
      * @return User
      */
     public static UserDTO bindToUser(FirebaseUser firebaseUser) {
-        UserDTO user = null;
         if (firebaseUser != null) {
-            user = new UserDTO();
+            UserDTO user = new UserDTO();
             user.setId(firebaseUser.getUid());
             user.setEmail(firebaseUser.getEmail());
             user.setName(firebaseUser.getDisplayName());
@@ -54,8 +58,9 @@ public class UserDAO implements IUserDAO {
             } else {
                 user.setType(UserDTO.types.STUDENT.name());
             }
+            return user;
         }
-        return user;
+        return null;
     }
 
     /**
@@ -75,6 +80,19 @@ public class UserDAO implements IUserDAO {
      */
     public static DatabaseReference getReferenceForId(String id) {
         return getReference().child(id);
+    }
+
+    /**
+     * Return StorageReference for a users profile photo
+     *
+     * @param id User ID
+     * @return StorageReference
+     */
+    public static StorageReference getPhotoReference(String id) {
+        return FirebaseStorage.getInstance().getReference()
+                .child("user")
+                .child(id)
+                .child("profile.jpg");
     }
 
     /**
@@ -101,7 +119,7 @@ public class UserDAO implements IUserDAO {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        FirebaseUser firebaseUser = task.getResult().getUser();
+                        final FirebaseUser firebaseUser = task.getResult().getUser();
                         if (task.isSuccessful() && firebaseUser != null) {
                             final TaskBatch taskBatch = new TaskBatch();
                             user.setId(firebaseUser.getUid());
@@ -186,29 +204,31 @@ public class UserDAO implements IUserDAO {
         final TaskBatch taskBatch = new TaskBatch();
 
         // Get current Firebase user
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        final FirebaseUser firebaseUser = mAuth.getCurrentUser();
         DatabaseReference databaseReference = mDatabase.getReference();
         if (firebaseUser == null) {
             return;
         }
 
-        // Update user name or photo uri, if it changed
-        // Create user profile change request (can only update display name and photo uri)
-        boolean isNewName = user.getName() != null && !user.getName().equals(firebaseUser
-                .getDisplayName());
-        boolean isNewPhotoUrl = user.getPhotoUrl() != null &&
-                (firebaseUser.getPhotoUrl() == null || !user.getPhotoUrl().equals(firebaseUser
-                        .getPhotoUrl().toString()));
-        if (isNewName || isNewPhotoUrl) {
-            UserProfileChangeRequest.Builder profileChangeBuilder = new UserProfileChangeRequest
-                    .Builder();
-            if (isNewName) {
-                profileChangeBuilder.setDisplayName(user.getName());
-            }
-            if (isNewPhotoUrl) {
-                profileChangeBuilder.setPhotoUri(Uri.parse(user.getPhotoUrl()));
-            }
-            taskBatch.addTask(firebaseUser.updateProfile(profileChangeBuilder.build()));
+        // Upload photo, if it exists
+        if (user.getPhoto() != null) {
+            UploadTask uploadTask = getPhotoReference(user.getId()).putBytes(user.getPhoto());
+            uploadTask.addOnCompleteListener(
+                    new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful() && task.getResult().getDownloadUrl() != null) {
+                                user.setPhotoUrl(task.getResult().getDownloadUrl().toString());
+                            }
+                        }
+                    });
+            taskBatch.addTask(uploadTask);
+        }
+
+        // Update user profile name
+        if (user.getName() != null && !user.getName().equals(firebaseUser.getDisplayName())) {
+            taskBatch.addTask(firebaseUser.updateProfile(
+                    new UserProfileChangeRequest.Builder().setDisplayName(user.getName()).build()));
         }
 
         // Update email if it changed
@@ -223,14 +243,26 @@ public class UserDAO implements IUserDAO {
 
         // Batch callback if we ran anything, otherwise just call onComplete
         if (taskBatch.getTaskCount() > 0) {
-            final int taskCount = taskBatch.getTaskCount();
+            int taskCount = taskBatch.getTaskCount();
+            if (user.getPhoto() != null) {
+                taskCount++;
+            }
+            final int finalTaskCount = taskCount;
             taskBatch.addObserver(new Observer() {
                 @Override
                 public void update(Observable observable, Object o) {
+                    // Update profile photo URL at the end if photo is set
+                    if (user.getPhoto() != null && taskBatch.getTaskCount() == finalTaskCount
+                            && taskBatch.isSuccessful()) {
+                        taskBatch.addTask(firebaseUser.updateProfile(new UserProfileChangeRequest
+                                .Builder().setPhotoUri(Uri.parse(user.getPhotoUrl())).build()));
+                    }
                     // If anything was updated and it's successful we'll copy to the database as well
-                    if (taskBatch.getTaskCount() == taskCount && taskBatch.isSuccessful()) {
+                    else if (taskBatch.getTaskCount() == finalTaskCount + 1 && taskBatch.isSuccessful()) {
                         taskBatch.addTask(copyUserToDatabaseTask(user));
-                    } else if (taskBatch.isAllComplete()) {
+                    }
+                    // When everything is complete, callback
+                    else if (taskBatch.isAllComplete()) {
                         callback.onComplete();
                         if (taskBatch.isSuccessful()) {
                             callback.onSuccess();
@@ -267,6 +299,18 @@ public class UserDAO implements IUserDAO {
             task.addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
+                    completedTasks.add(task);
+                    setChanged();
+                    notifyObservers();
+                }
+            });
+        }
+
+        void addTask(UploadTask uploadTask) {
+            taskCount++;
+            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     completedTasks.add(task);
                     setChanged();
                     notifyObservers();

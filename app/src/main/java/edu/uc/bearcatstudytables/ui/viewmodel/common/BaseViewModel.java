@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.viewmodel.common;
+package edu.uc.bearcatstudytables.ui.viewmodel.common;
 
 /**
  * Created by connorbowman on 10/11/17.
@@ -19,11 +19,11 @@ public class BaseViewModel extends ViewModel implements Observable {
 
     private final PropertyChangeRegistry mPropertyChangeRegistry = new PropertyChangeRegistry();
 
-    protected void notifyChange() {
+    public void notifyChange() {
         mPropertyChangeRegistry.notifyChange(this, BR._all);
     }
 
-    protected void notifyPropertyChanged(int fieldId) {
+    public void notifyPropertyChanged(int fieldId) {
         mPropertyChangeRegistry.notifyChange(this, fieldId);
     }
 

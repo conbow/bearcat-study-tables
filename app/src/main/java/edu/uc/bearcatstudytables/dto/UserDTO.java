@@ -17,6 +17,7 @@ public class UserDTO {
     private String name;
     private String password;
     private String photoUrl;
+    private byte[] photo;
     private String type;
 
     public UserDTO() {
@@ -67,6 +68,15 @@ public class UserDTO {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    @Exclude
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 
     public String getType() {

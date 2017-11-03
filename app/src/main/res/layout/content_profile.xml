@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
 
         <variable
             name="viewModel"
-            type="edu.uc.bearcatstudytables.viewmodel.AuthViewModel" />
+            type="edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel" />
 
     </data>
 
@@ -29,18 +28,18 @@
 
                 <ImageView
                     android:id="@+id/profile_photo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxHeight="64dp"
-                    android:maxWidth="64dp"
-                    android:minHeight="64dp"
-                    android:minWidth="64dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginBottom="@dimen/layout_margin"
+                    android:layout_marginRight="@dimen/layout_margin"
+                    android:layout_marginTop="@dimen/layout_margin"
+                    android:contentDescription="@string/action_profile"
                     android:onClick="onProfilePhotoChangeButtonClick"
-                    android:paddingBottom="@dimen/layout_margin"
-                    android:paddingRight="@dimen/layout_margin"
-                    android:paddingTop="@dimen/layout_margin"
                     android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/ic_account_circle" />
+                    bind:imageData="@{viewModel.user.photo}"
+                    bind:imagePlaceholder="@{@drawable/ic_account_circle_gray}"
+                    bind:imageRenderCircle="@{true}"
+                    bind:imageUrl="@{viewModel.user.photoUrl}" />
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="0dp"

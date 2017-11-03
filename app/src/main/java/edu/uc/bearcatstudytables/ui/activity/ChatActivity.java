@@ -1,16 +1,13 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -22,6 +19,7 @@ import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.ChatMessageDAO;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
 import edu.uc.bearcatstudytables.databinding.ActivityChatBinding;
+import edu.uc.bearcatstudytables.databinding.ListItemChatMessageBinding;
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
@@ -43,6 +41,7 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(KEY_CHAT_NAME));
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_chat);
+
         mChatMessage = new ChatMessageDTO();
         mBinding.setChatMessage(mChatMessage);
         mCourseId = getIntent().getStringExtra(KEY_CHAT_ID);
@@ -58,17 +57,25 @@ public class ChatActivity extends BaseActivity {
                         .setQuery(query, ChatMessageDTO.class)
                         .build();
 
-        mAdapter = new FirebaseRecyclerAdapter<ChatMessageDTO, CourseChatMessageViewHolder>(options) {
+        mAdapter = new FirebaseRecyclerAdapter<ChatMessageDTO, ChatMessageViewHolder>(options) {
             @Override
-            public CourseChatMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                return new CourseChatMessageViewHolder(LayoutInflater.from(parent.getContext())
+            public ChatMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+                ListItemChatMessageBinding binding = ListItemChatMessageBinding
+                        .inflate(layoutInflater, parent, false);
+                return new ChatMessageViewHolder(binding);
+                //binding.setUser();
+                //return ListItemChatMessageBinding.inflate(LayoutInflater.from(parent.getContext());
+                /*
+                return new ChatMessageViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.list_item_chat_message, parent, false));
+                        */
             }
 
             @Override
-            protected void onBindViewHolder(CourseChatMessageViewHolder viewHolder, int position,
+            protected void onBindViewHolder(ChatMessageViewHolder viewHolder, int position,
                                             final ChatMessageDTO model) {
-                viewHolder.bind(mCurrentUser, model);
+                viewHolder.bind(mCurrentUser.get(), model);
             }
 
             @Override
@@ -94,7 +101,7 @@ public class ChatActivity extends BaseActivity {
         if (!mChatMessage.getMessage().isEmpty()) {
             mChatMessage.setDate(new Date());
             mChatMessage.setCourseId(mCourseId);
-            mChatMessage.setFrom(mCurrentUser);
+            mChatMessage.setFrom(mCurrentUser.get());
 
             mChatService.sendMessage(mCourseId, mChatMessage, new IDataAccess.TaskCallback() {
                 @Override
@@ -136,35 +143,20 @@ public class ChatActivity extends BaseActivity {
         mAdapter.stopListening();
     }
 
-    private static class CourseChatMessageViewHolder extends RecyclerView.ViewHolder {
+    private static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
 
-        private final LinearLayout mChatBubble;
-        private final TextView mChatMessageText;
+        private ListItemChatMessageBinding mBinding;
 
-        private CourseChatMessageViewHolder(View view) {
-            super(view);
-            mChatBubble = view.findViewById(R.id.chat_bubble);
-            mChatMessageText = view.findViewById(R.id.chat_message_text);
+        private ChatMessageViewHolder(ListItemChatMessageBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
         }
 
         private void bind(UserDTO currentUser, ChatMessageDTO chatMessage) {
             boolean isFromCurrentUser = chatMessage.getFrom().getEmail().equals(currentUser
                     .getEmail());
-            String userName = chatMessage.getFrom().getName();
-            String messagePrefix = !userName.isEmpty() ? userName + ": " : "";
-            setChatMessage(isFromCurrentUser, messagePrefix + chatMessage.getMessage());
-        }
-
-        private void setChatMessage(boolean isFromCurrentUser, String chatMessage) {
-            // Set chat bubble to the left or right
-            if (isFromCurrentUser) {
-                mChatBubble.setGravity(Gravity.RIGHT);
-            } else {
-                mChatBubble.setGravity(Gravity.LEFT);
-            }
-
-            // Set chat bubble text
-            mChatMessageText.setText(chatMessage);
+            mBinding.setChatMessage(chatMessage);
+            mBinding.setIsFromCurrentUser(isFromCurrentUser);
         }
     }
 }

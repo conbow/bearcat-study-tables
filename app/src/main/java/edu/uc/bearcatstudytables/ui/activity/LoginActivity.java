@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -13,8 +13,8 @@ import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
 import edu.uc.bearcatstudytables.databinding.ActivityLoginBinding;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-import edu.uc.bearcatstudytables.util.ValidationUtil;
-import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
+import edu.uc.bearcatstudytables.ui.util.ValidationUtil;
+import edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel;
 
 /**
  * Created by connorbowman on 10/4/17.

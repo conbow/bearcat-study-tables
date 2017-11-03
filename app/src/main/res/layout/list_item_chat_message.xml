@@ -1,22 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/chat_bubble"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/chat_message_text"
-        android:layout_width="wrap_content"
+    <data>
+
+        <import type="android.view.Gravity" />
+
+        <variable
+            name="isFromCurrentUser"
+            type="boolean" />
+
+        <variable
+            name="chatMessage"
+            type="edu.uc.bearcatstudytables.dto.ChatMessageDTO" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/chat_bubble"
-        android:paddingBottom="5dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp"
-        tools:text="Hello" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-</LinearLayout>
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="4dp"
+            android:contentDescription="@string/action_profile"
+            android:scaleType="fitCenter"
+            bind:imagePlaceholder="@{@drawable/ic_account_circle_gray}"
+            bind:imageRenderCircle="@{true}"
+            bind:imageUrl="@{chatMessage.from.photoUrl}"
+            bind:isVisible="@{!isFromCurrentUser}" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="@{isFromCurrentUser ? Gravity.RIGHT : Gravity.LEFT}"
+            android:orientation="vertical"
+            android:paddingLeft="@{isFromCurrentUser ? @dimen/chat_overflow_margin : @dimen/zero}"
+            android:paddingRight="@{!isFromCurrentUser ? @dimen/chat_overflow_margin : @dimen/zero}">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/chat_bubble"
+                android:paddingBottom="5dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp"
+                android:text='@{chatMessage.from.name + ": " + chatMessage.message}'
+                tools:text="Hello" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginLeft="4dp"
+            android:contentDescription="@string/action_profile"
+            android:scaleType="fitCenter"
+            bind:imagePlaceholder="@{@drawable/ic_menu_account_circle}"
+            bind:imageRenderCircle="@{true}"
+            bind:imageUrl="@{chatMessage.from.photoUrl}"
+            bind:isVisible="@{isFromCurrentUser}" />
+
+    </LinearLayout>
+
+</layout>

@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.util;
+package edu.uc.bearcatstudytables.ui.util;
 
 import android.text.TextUtils;
 
@@ -13,7 +13,7 @@ public class ValidationUtil {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
-    public static boolean isUCEmail(String email) {
+    public static boolean isUniversityEmail(String email) {
         return email.endsWith("uc.edu") || email.endsWith("mail.uc.edu");
     }
 

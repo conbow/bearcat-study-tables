@@ -1,9 +1,10 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -20,7 +21,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+
+import java.io.ByteArrayOutputStream;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
@@ -28,18 +31,16 @@ import edu.uc.bearcatstudytables.databinding.ActivityUserBinding;
 import edu.uc.bearcatstudytables.databinding.NavHeaderUserBinding;
 import edu.uc.bearcatstudytables.dto.ChatDTO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-import edu.uc.bearcatstudytables.fragment.ChatsFragment;
-import edu.uc.bearcatstudytables.util.CircleTransformUtil;
-import edu.uc.bearcatstudytables.util.ValidationUtil;
-import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
-
-import static edu.uc.bearcatstudytables.activity.ProfileActivity.REQUEST_IMAGE_CAPTURE;
+import edu.uc.bearcatstudytables.ui.fragment.ChatsFragment;
+import edu.uc.bearcatstudytables.ui.util.ValidationUtil;
+import edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel;
 
 public class UserActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "UserActivity";
 
+    public static final int REQUEST_IMAGE_CAPTURE = 5;
     private static final String KEY_NAV_ID = "NAV_ID";
     private static final int NAV_CHATS = 0;
     private static final int NAV_PROFILE = 1;
@@ -58,7 +59,15 @@ public class UserActivity extends BaseActivity
         // Setup Bindings
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_user);
         mProfileViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
-        mProfileViewModel.setUserObservable(mCurrentUserObservable);
+        if (savedInstanceState == null) {
+            mProfileViewModel.setUser(mCurrentUser.get());
+        }
+        mProfileViewModel.currentUser = mCurrentUser;
+        /*
+        if (mProfileViewModel.getCurrentUser() == null) {
+            mProfileViewModel.setCurrentUserObservable(mCurrentUser);
+        }*/
+        mBinding.pageProfile.setViewModel(mProfileViewModel);
 
         NavHeaderUserBinding navHeaderUserBinding =
                 DataBindingUtil.inflate(getLayoutInflater(), R.layout.nav_header_user, mBinding
@@ -67,7 +76,7 @@ public class UserActivity extends BaseActivity
         navHeaderUserBinding.setViewModel(mProfileViewModel);
 
         // Setup toolbar / nav drawer
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mBinding.drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -76,21 +85,12 @@ public class UserActivity extends BaseActivity
         mBinding.navView.getMenu().getItem(mCurrentNav).setChecked(true);
         mBinding.navView.setNavigationItemSelectedListener(this);
 
-        // Set nav drawer photo, if it exists
-        String photoUrl = mUserService.getCurrentUser().getPhotoUrl();
-        if (photoUrl != null) {
-            Picasso.with(this).load(photoUrl)
-                    .fit()
-                    .transform(new CircleTransformUtil())
-                    .placeholder(R.drawable.ic_account_circle)
-                    .error(R.drawable.ic_account_circle)
-                    .into(navHeaderUserBinding.profilePhoto);
-        }
+        // Setup tabs (courses / groups)
+        mBinding.contentViewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager()));
+        mBinding.contentViewPager.addOnPageChangeListener(new TabPagerListener());
+        mBinding.appBarChats.contentTabLayout.setupWithViewPager(mBinding.contentViewPager);
 
-        setupMainPage();
-        setupProfilePage();
-
-        showPage(mCurrentNav);
+        showScreen(mCurrentNav);
     }
 
     @Override
@@ -99,12 +99,18 @@ public class UserActivity extends BaseActivity
         toggleFabButton(mTabPosition);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        toggleFabButton(mTabPosition);
+    }
+
     private void toggleFabButton(int position) {
-        if (position == 0 && !mUserService.getCurrentUser().getType().equals(
-                UserDTO.types.INSTRUCTOR.toString())) {
-            mBinding.fab.hide();
-        } else {
+        if ((position == 0 && mCurrentUser.get().getType().equals(UserDTO.types.INSTRUCTOR.name()))
+                || (position != 0 && mCurrentNav == 0)) {
             mBinding.fab.show();
+        } else {
+            mBinding.fab.hide();
         }
     }
 
@@ -112,36 +118,12 @@ public class UserActivity extends BaseActivity
         return position == 0 ? ChatDTO.types.COURSE : ChatDTO.types.GROUP;
     }
 
-    private void setupMainPage() {
-        // Setup tabs (courses / groups)
-        mBinding.contentViewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager()));
-        mBinding.contentViewPager.addOnPageChangeListener(new TabPagerListener());
-        mBinding.appBarChats.contentTabLayout.setupWithViewPager(mBinding.contentViewPager);
-    }
-
-    private void setupProfilePage() {
-        // Bind existing user info to view model, include password in case it changes
-        mCurrentUser.setPassword(mProfileViewModel.getUser().getPassword());
-        mProfileViewModel.setUser(mCurrentUser);
-        mBinding.pageProfile.setViewModel(mProfileViewModel);
-
-        String photoUrl = mUserService.getCurrentUser().getPhotoUrl();
-        if (photoUrl != null) {
-            Picasso.with(this).load(photoUrl)
-                    .fit()
-                    .transform(new CircleTransformUtil())
-                    .placeholder(R.drawable.ic_account_circle)
-                    .error(R.drawable.ic_account_circle)
-                    .into(mBinding.pageProfile.profilePhoto);
-        }
-    }
-
-    private void showPage(int navId) {
+    private void showScreen(int navId) {
         boolean isMain = (navId == NAV_CHATS);
 
         if (isMain) {
             setTitle(R.string.chats);
-            mBinding.fab.show();
+            toggleFabButton(mTabPosition);
         } else if (navId == NAV_PROFILE) {
             setTitle(R.string.action_profile);
             mBinding.fab.hide();
@@ -213,8 +195,21 @@ public class UserActivity extends BaseActivity
                 @Override
                 public void onComplete() {
                     mBinding.pageProfile.passwordRepeat.setText("");
-                    mUserService.reload();
                     mProfileViewModel.setIsLoading(false);
+
+                    // Clear glide image cache and reload current user
+                    Glide.get(UserActivity.this).clearMemory();
+                    new AsyncTask<Void, Void, Void>() {
+                        protected Void doInBackground(Void... unused) {
+                            Glide.get(UserActivity.this).clearDiskCache();
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            mUserService.reload();
+                        }
+                    }.execute();
                 }
 
                 @Override
@@ -234,10 +229,6 @@ public class UserActivity extends BaseActivity
     }
 
     public void onProfilePhotoChangeButtonClick(View view) {
-        dispatchTakePictureIntent();
-    }
-
-    private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -281,9 +272,9 @@ public class UserActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_chats) {
-            showPage(NAV_CHATS);
+            showScreen(NAV_CHATS);
         } else if (id == R.id.nav_profile) {
-            showPage(NAV_PROFILE);
+            showScreen(NAV_PROFILE);
         } else if (id == R.id.nav_logout) {
             // We just need to call logout, auth listener will then kick them out of the Activity
             mUserService.logout();
@@ -295,21 +286,30 @@ public class UserActivity extends BaseActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        int feedback = mTabPosition == 0 ? R.string.feedback_course_created
-                : R.string.feedback_group_created;
+        // Handle activity result for either creating a chat group or adding a profile image
         if (requestCode == ChatAddActivity.REQUEST_CODE && resultCode == RESULT_OK) {
+            int feedback = mTabPosition == 0 ? R.string.feedback_course_created
+                    : R.string.feedback_group_created;
             Snackbar.make(findViewById(R.id.container), getString(feedback), Snackbar.LENGTH_LONG)
                     .show();
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            // Get the image from intent extras bundle
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mBinding.pageProfile.profilePhoto.setImageBitmap(imageBitmap);
+            if (imageBitmap != null) {
+                // Compress the image and put it into user DTO
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                mProfileViewModel.getUser().setPhoto(byteArrayOutputStream.toByteArray());
+                mProfileViewModel.setUser(mProfileViewModel.getUser());
+            }
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        // Save current navigation state
         outState.putInt(KEY_NAV_ID, mCurrentNav);
     }
 

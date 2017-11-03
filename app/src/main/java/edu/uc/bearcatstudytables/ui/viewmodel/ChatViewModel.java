@@ -1,7 +1,7 @@
-package edu.uc.bearcatstudytables.viewmodel;
+package edu.uc.bearcatstudytables.ui.viewmodel;
 
 import edu.uc.bearcatstudytables.dto.ChatDTO;
-import edu.uc.bearcatstudytables.viewmodel.common.TaskDataViewModel;
+import edu.uc.bearcatstudytables.ui.viewmodel.common.TaskDataViewModel;
 
 /**
  * Created by connorbowman on 10/13/17.

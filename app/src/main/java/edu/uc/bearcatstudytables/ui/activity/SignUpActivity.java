@@ -1,4 +1,4 @@
-package edu.uc.bearcatstudytables.activity;
+package edu.uc.bearcatstudytables.ui.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.databinding.DataBindingUtil;
@@ -10,8 +10,8 @@ import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.IDataAccess;
 import edu.uc.bearcatstudytables.databinding.ActivitySignUpBinding;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-import edu.uc.bearcatstudytables.util.ValidationUtil;
-import edu.uc.bearcatstudytables.viewmodel.AuthViewModel;
+import edu.uc.bearcatstudytables.ui.util.ValidationUtil;
+import edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel;
 
 public class SignUpActivity extends BaseActivity {
 
