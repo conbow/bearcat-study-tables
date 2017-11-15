@@ -9,8 +9,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -20,22 +23,15 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-
-/**
- * Created by connorbowman on 10/19/17.
- */
 
 public class UserDAO implements IUserDAO {
 
     private FirebaseAuth mAuth;
-    private FirebaseDatabase mDatabase;
-    private FirebaseStorage mStorage;
 
     public UserDAO() {
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance();
-        mStorage = FirebaseStorage.getInstance();
     }
 
     /**
@@ -52,11 +48,11 @@ public class UserDAO implements IUserDAO {
             user.setName(firebaseUser.getDisplayName());
             user.setPhotoUrl(firebaseUser.getPhotoUrl() != null ? firebaseUser.getPhotoUrl()
                     .toString() : null);
-            // User type is instructor if email ends with @uc.edu, otherwise student
-            if (user.getEmail().endsWith("@uc.edu")) {
-                user.setType(UserDTO.types.INSTRUCTOR.name());
+            // User type is instructor if email is @uc.edu or @ucmail.uc.edu, otherwise student
+            if (user.getEmail().endsWith("@uc.edu") || user.getEmail().endsWith("@ucmail.uc.edu")) {
+                user.setType(UserDTO.Type.INSTRUCTOR);
             } else {
-                user.setType(UserDTO.types.STUDENT.name());
+                user.setType(UserDTO.Type.STUDENT);
             }
             return user;
         }
@@ -101,9 +97,37 @@ public class UserDAO implements IUserDAO {
      * So we maintain id->email in Firebase database
      *
      * @param user User
+     * @return Task<Void>
      */
     private Task<Void> copyUserToDatabaseTask(UserDTO user) {
+        updateUserChatMessages(user);
         return getReferenceForId(user.getId()).setValue(user);
+    }
+
+    /**
+     * Update users info for each of their existing chat messages
+     *
+     * @param user User
+     */
+    private void updateUserChatMessages(final UserDTO user) {
+        ChatMessageDAO.getReference().orderByChild("from/id").equalTo(user.getId())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot chatMessageDataSnapshot : dataSnapshot.getChildren()) {
+                            ChatMessageDTO chatMessage = chatMessageDataSnapshot
+                                    .getValue(ChatMessageDTO.class);
+                            if (chatMessage != null) {
+                                chatMessageDataSnapshot.getRef().child("from").setValue(user);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     /**
@@ -113,14 +137,14 @@ public class UserDAO implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void create(final UserDTO user, final TaskCallback callback) {
+    public void create(final UserDTO user, final DataAccess.TaskCallback callback) {
         callback.onStart();
         mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        final FirebaseUser firebaseUser = task.getResult().getUser();
-                        if (task.isSuccessful() && firebaseUser != null) {
+                        if (task.isSuccessful()) {
+                            final FirebaseUser firebaseUser = task.getResult().getUser();
                             final TaskBatch taskBatch = new TaskBatch();
                             user.setId(firebaseUser.getUid());
 
@@ -139,7 +163,7 @@ public class UserDAO implements IUserDAO {
                                 public void update(Observable observable, Object o) {
                                     if (taskBatch.isAllComplete()) {
                                         callback.onComplete();
-                                        if (taskBatch.isSuccessful()) {
+                                        if (taskBatch.isAllSuccessful()) {
                                             callback.onSuccess();
                                         } else {
                                             callback.onFailure(taskBatch.getException());
@@ -161,8 +185,28 @@ public class UserDAO implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(TaskDataCallback<List<UserDTO>> callback) {
+    public void fetchAll(final DataAccess.TaskDataCallback<List<UserDTO>> callback) {
+        callback.onStart();
+        getReference().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<UserDTO> users = new ArrayList<>();
+                for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
+                    UserDTO user = dataSnapshotChild.getValue(UserDTO.class);
+                    if (user != null) {
+                        users.add(user);
+                    }
+                }
+                callback.onComplete();
+                callback.onSuccess(users);
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onComplete();
+                callback.onFailure(databaseError.toException());
+            }
+        });
     }
 
     /**
@@ -172,7 +216,7 @@ public class UserDAO implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(String userId, UserDTO callback) {
+    public void fetchById(String userId, DataAccess.TaskDataCallback<UserDTO> callback) {
 
     }
 
@@ -183,8 +227,22 @@ public class UserDAO implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(UserDTO user, TaskDataCallback<List<UserDTO>> callback) {
+    public void fetch(UserDTO user, DataAccess.TaskDataCallback<List<UserDTO>> callback) {
 
+    }
+
+    private OnCompleteListener<Task> onComplete(final DataAccess.TaskCallback callback) {
+        return new OnCompleteListener<Task>() {
+            @Override
+            public void onComplete(@NonNull Task<Task> task) {
+                callback.onComplete();
+                if (task.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure(task.getException());
+                }
+            }
+        };
     }
 
     /**
@@ -194,21 +252,21 @@ public class UserDAO implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void update(final UserDTO user, final TaskCallback callback) {
-        callback.onStart();
+    public void update(final UserDTO user, final DataAccess.TaskCallback callback) {
 
         // TODO Clean this up, it was callback hell, now probably worse
         // The challenge is that there is no way to update every profile field at once
         // so the goal was to get everything into one callback for simplicity in the UI
 
-        final TaskBatch taskBatch = new TaskBatch();
+        callback.onStart();
 
         // Get current Firebase user
         final FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        DatabaseReference databaseReference = mDatabase.getReference();
         if (firebaseUser == null) {
             return;
         }
+
+        final TaskBatch taskBatch = new TaskBatch();
 
         // Upload photo, if it exists
         if (user.getPhoto() != null) {
@@ -220,12 +278,17 @@ public class UserDAO implements IUserDAO {
                             if (task.isSuccessful() && task.getResult().getDownloadUrl() != null) {
                                 user.setPhotoUrl(task.getResult().getDownloadUrl().toString());
                             }
+                            taskBatch.addTask(firebaseUser
+                                    .updateProfile(new UserProfileChangeRequest
+                                            .Builder().setPhotoUri(Uri.parse(user.getPhotoUrl()))
+                                            .build()), false);
                         }
                     });
+            taskBatch.taskCount++;
             taskBatch.addTask(uploadTask);
         }
 
-        // Update user profile name
+        // Update user profile name if it changed
         if (user.getName() != null && !user.getName().equals(firebaseUser.getDisplayName())) {
             taskBatch.addTask(firebaseUser.updateProfile(
                     new UserProfileChangeRequest.Builder().setDisplayName(user.getName()).build()));
@@ -236,35 +299,36 @@ public class UserDAO implements IUserDAO {
             taskBatch.addTask(firebaseUser.updateEmail(user.getEmail()));
         }
 
-        // Update password if it changed (if it's set, it will be changed)
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            taskBatch.addTask(firebaseUser.updatePassword(user.getPassword()));
+        // If anything was updated copy user to the database
+        if (taskBatch.getTaskCount() > 0) {
+            taskBatch.addTask(copyUserToDatabaseTask(user));
         }
 
-        // Batch callback if we ran anything, otherwise just call onComplete
-        if (taskBatch.getTaskCount() > 0) {
-            int taskCount = taskBatch.getTaskCount();
-            if (user.getPhoto() != null) {
-                taskCount++;
-            }
-            final int finalTaskCount = taskCount;
+        // Update password if it changed (if it's set, it will be changed)
+        // Changed at the end otherwise it may cause session problems for other concurrent requests
+        if (!user.getPassword().isEmpty()) {
+            final int taskCount = taskBatch.getTaskCount();
             taskBatch.addObserver(new Observer() {
                 @Override
                 public void update(Observable observable, Object o) {
-                    // Update profile photo URL at the end if photo is set
-                    if (user.getPhoto() != null && taskBatch.getTaskCount() == finalTaskCount
-                            && taskBatch.isSuccessful()) {
-                        taskBatch.addTask(firebaseUser.updateProfile(new UserProfileChangeRequest
-                                .Builder().setPhotoUri(Uri.parse(user.getPhotoUrl())).build()));
+                    if (taskBatch.getCompletedTaskCount() == taskCount) {
+                        taskBatch.addTask(firebaseUser.updatePassword(user.getPassword()), false);
                     }
-                    // If anything was updated and it's successful we'll copy to the database as well
-                    else if (taskBatch.getTaskCount() == finalTaskCount + 1 && taskBatch.isSuccessful()) {
-                        taskBatch.addTask(copyUserToDatabaseTask(user));
-                    }
+                }
+            });
+            taskBatch.incTaskCount();
+        }
+
+        // Batch callback if we ran anything, otherwise just call onComplete
+        final int tasksCount = taskBatch.getTaskCount();
+        if (tasksCount > 0) {
+            taskBatch.addObserver(new Observer() {
+                @Override
+                public void update(Observable observable, Object o) {
                     // When everything is complete, callback
-                    else if (taskBatch.isAllComplete()) {
+                    if (taskBatch.isAllComplete()) {
                         callback.onComplete();
-                        if (taskBatch.isSuccessful()) {
+                        if (taskBatch.isAllSuccessful()) {
                             callback.onSuccess();
                         } else {
                             callback.onFailure(taskBatch.getException());
@@ -290,12 +354,27 @@ public class UserDAO implements IUserDAO {
             return taskCount;
         }
 
+        void incTaskCount() {
+            taskCount++;
+            setChanged();
+            notifyObservers();
+        }
+
+        int getCompletedTaskCount() {
+            return completedTasks.size();
+        }
+
         List<Task> getCompletedTasks() {
             return completedTasks;
         }
 
         void addTask(Task<Void> task) {
-            taskCount++;
+            addTask(task, true);
+        }
+
+        void addTask(Task<Void> task, boolean incrementTaskCount) {
+            if (incrementTaskCount)
+                taskCount++;
             task.addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -318,7 +397,7 @@ public class UserDAO implements IUserDAO {
             });
         }
 
-        boolean isSuccessful() {
+        boolean isAllSuccessful() {
             for (Task task : completedTasks) {
                 if (!task.isSuccessful()) {
                     return false;
@@ -328,14 +407,15 @@ public class UserDAO implements IUserDAO {
         }
 
         boolean isAllComplete() {
-            return getCompletedTasks().size() == getTaskCount();
+            return getCompletedTaskCount() == getTaskCount();
         }
 
         Exception getException() {
             for (Task task : completedTasks) {
                 if (!task.isSuccessful()) {
                     try {
-                        throw task.getException();
+                        if (task.getException() != null)
+                            throw task.getException();
                     } catch (Exception e) {
                         return e;
                     }

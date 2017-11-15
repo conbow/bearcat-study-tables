@@ -7,32 +7,28 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import edu.uc.bearcatstudytables.R;
-import edu.uc.bearcatstudytables.dao.IDataAccess;
+import edu.uc.bearcatstudytables.dao.DataAccess;
 import edu.uc.bearcatstudytables.databinding.ActivityForgotPasswordBinding;
-import edu.uc.bearcatstudytables.dto.UserDTO;
-import edu.uc.bearcatstudytables.ui.util.ValidationUtil;
 import edu.uc.bearcatstudytables.ui.viewmodel.AuthViewModel;
 
 public class ForgotPasswordActivity extends BaseActivity {
 
-    private static final String TAG = "ForgotPasswordActivity";
-
     public static final int REQUEST_CODE = 2;
 
-    private ActivityForgotPasswordBinding mBinding;
     private AuthViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(R.string.action_forgot_password);
+        setTitle(R.string.forgot_password);
 
         // Setup ViewModel for retaining data on configuration changes
         mViewModel = ViewModelProviders.of(this).get(AuthViewModel.class);
 
         // Setup data binding and set ViewModel
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_forgot_password);
-        mBinding.setViewModel(mViewModel);
+        ActivityForgotPasswordBinding binding = DataBindingUtil
+                .setContentView(this, R.layout.activity_forgot_password);
+        binding.setViewModel(mViewModel);
     }
 
     /**
@@ -42,25 +38,8 @@ public class ForgotPasswordActivity extends BaseActivity {
      * @param view View
      */
     public void onPasswordResetButtonClick(final View view) {
-        final UserDTO inputUser = mViewModel.getUser();
-
-        // Input validation
-        View focusView = null;
-        // Email
-        if (inputUser.getEmail().isEmpty()) {
-            mBinding.email.setError(getString(R.string.error_field_required));
-            focusView = mBinding.email;
-        } else if (!ValidationUtil.isValidEmail(inputUser.getEmail())) {
-            mBinding.email.setError(getString(R.string.error_invalid_email));
-            focusView = mBinding.email;
-        }
-
-        // Check input validation and attempt password reset
-        if (focusView != null) {
-            focusView.requestFocus();
-        } else {
-
-            mUserService.resetPassword(inputUser, new IDataAccess.TaskCallback() {
+        if (mViewModel.getValidation().isValid()) {
+            mUserService.resetPassword(mViewModel.getUser(), new DataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
                     mViewModel.setIsLoading(true);
@@ -68,7 +47,8 @@ public class ForgotPasswordActivity extends BaseActivity {
 
                 @Override
                 public void onComplete() {
-                    mViewModel.setIsLoading(false);
+                    // We don't hide progress unless the task fails, because we don't want the user
+                    // to be able to click again in the split second when switching activities
                 }
 
                 @Override
@@ -79,6 +59,8 @@ public class ForgotPasswordActivity extends BaseActivity {
 
                 @Override
                 public void onFailure(Exception e) {
+                    mViewModel.setIsLoading(false);
+
                     // Show error message
                     Snackbar.make(view, e.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
                 }

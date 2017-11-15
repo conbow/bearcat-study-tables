@@ -2,11 +2,7 @@ package edu.uc.bearcatstudytables.dao;
 
 import edu.uc.bearcatstudytables.dto.ChatDTO;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
-public interface IChatDAO extends IDataAccess {
+public interface IChatDAO {
 
     /**
      * Create a new chat (course or group)
@@ -14,7 +10,7 @@ public interface IChatDAO extends IDataAccess {
      * @param chat     Chat
      * @param callback Callback
      */
-    void create(ChatDTO chat, TaskCallback callback);
+    void create(ChatDTO chat, DataAccess.TaskCallback callback);
 
     /**
      * Update a chat (course or group)
@@ -22,5 +18,5 @@ public interface IChatDAO extends IDataAccess {
      * @param chat     Chat
      * @param callback Callback
      */
-    void update(ChatDTO chat, TaskCallback callback);
+    void update(ChatDTO chat, DataAccess.TaskCallback callback);
 }

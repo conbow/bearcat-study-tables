@@ -4,10 +4,6 @@ import java.util.List;
 
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
 public class UserDAOStub implements IUserDAO {
 
     /**
@@ -17,7 +13,7 @@ public class UserDAOStub implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void create(UserDTO user, TaskCallback callback) {
+    public void create(UserDTO user, DataAccess.TaskCallback callback) {
 
     }
 
@@ -27,7 +23,7 @@ public class UserDAOStub implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(TaskDataCallback<List<UserDTO>> callback) {
+    public void fetchAll(DataAccess.TaskDataCallback<List<UserDTO>> callback) {
 
     }
 
@@ -38,7 +34,7 @@ public class UserDAOStub implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(String userId, UserDTO callback) {
+    public void fetchById(String userId, DataAccess.TaskDataCallback<UserDTO> callback) {
 
     }
 
@@ -49,7 +45,7 @@ public class UserDAOStub implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void fetch(UserDTO user, TaskDataCallback<List<UserDTO>> callback) {
+    public void fetch(UserDTO user, DataAccess.TaskDataCallback<List<UserDTO>> callback) {
 
     }
 
@@ -60,7 +56,7 @@ public class UserDAOStub implements IUserDAO {
      * @param callback Callback
      */
     @Override
-    public void update(UserDTO user, TaskCallback callback) {
+    public void update(UserDTO user, DataAccess.TaskCallback callback) {
 
     }
 }

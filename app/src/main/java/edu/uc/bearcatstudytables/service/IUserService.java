@@ -1,13 +1,11 @@
 package edu.uc.bearcatstudytables.service;
 
-import edu.uc.bearcatstudytables.dao.IDataAccess;
+import java.util.List;
+
+import edu.uc.bearcatstudytables.dao.DataAccess;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
-public interface IUserService extends IDataAccess {
+public interface IUserService {
 
     /**
      * Start Service
@@ -22,7 +20,7 @@ public interface IUserService extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void login(UserDTO user, TaskCallback callback);
+    void login(UserDTO user, DataAccess.TaskCallback callback);
 
     /**
      * Logout current user
@@ -49,7 +47,14 @@ public interface IUserService extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void signUp(UserDTO user, TaskCallback callback);
+    void signUp(UserDTO user, DataAccess.TaskCallback callback);
+
+    /**
+     * Fetch all users
+     *
+     * @param callback Callback
+     */
+    void fetchAll(DataAccess.TaskDataCallback<List<UserDTO>> callback);
 
     /**
      * Reset a user password
@@ -57,7 +62,7 @@ public interface IUserService extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void resetPassword(UserDTO user, TaskCallback callback);
+    void resetPassword(UserDTO user, DataAccess.TaskCallback callback);
 
     /**
      * Update current users profile
@@ -65,7 +70,7 @@ public interface IUserService extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void updateProfile(UserDTO user, TaskCallback callback);
+    void updateProfile(UserDTO user, DataAccess.TaskCallback callback);
 
     /**
      * Stop Service

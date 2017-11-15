@@ -30,18 +30,19 @@
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <!-- bind:validate='@{"required|email"}' -->
 
                     <android.support.design.widget.TextInputEditText
                         android:id="@+id/email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_email"
+                        android:hint="@string/email"
                         android:imeOptions="actionNext|flagNoExtractUi"
                         android:inputType="textEmailAddress"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@={viewModel.user.email}" />
+                        android:text="@={viewModel.user.email}"
+                        bind:validate='@{"required|email"}'
+                        bind:validator="@{viewModel.validation}" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -53,12 +54,14 @@
                         android:id="@+id/password"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_password"
+                        android:hint="@string/password"
                         android:imeOptions="actionNext|flagNoExtractUi"
                         android:inputType="textPassword"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@={viewModel.user.password}" />
+                        android:text="@={viewModel.user.password}"
+                        bind:validate='@{"required|password"}'
+                        bind:validator="@{viewModel.validation}" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -80,7 +83,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:onClick="onLoginButtonClick"
-                        android:text="@string/action_login"
+                        android:text="@string/login"
                         bind:isVisible="@{!viewModel.isLoading}" />
 
                 </LinearLayout>
@@ -92,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/layout_margin"
                     android:onClick="onSignUpButtonClick"
-                    android:text="@string/action_sign_up_prompt" />
+                    android:text="@string/dont_have_an_account_sign_up" />
 
             </LinearLayout>
 

@@ -32,12 +32,14 @@
                         android:id="@+id/name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_name"
+                        android:hint="@string/name"
                         android:imeOptions="actionNext|flagNoExtractUi"
                         android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@={viewModel.data.name}" />
+                        android:text="@={viewModel.data.name}"
+                        bind:validate='@{"required"}'
+                        bind:validator="@{viewModel.validation}" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -49,7 +51,7 @@
                         android:id="@+id/description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_description"
+                        android:hint="@string/description"
                         android:imeOptions="actionNext|flagNoExtractUi"
                         android:inputType="text"
                         android:maxLines="1"
@@ -71,7 +73,10 @@
                             android:id="@+id/students_auto_complete"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/students" />
+                            android:enabled="@{!viewModel.isLoadingStudents}"
+                            android:hint="@string/students"
+                            bind:validate='@{"required"}'
+                            bind:validator="@{viewModel.validation}" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -80,10 +85,11 @@
                         style="?android:attr/progressBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignEnd="@id/students_auto_complete_layout"
                         android:layout_alignRight="@id/students_auto_complete_layout"
-                        android:layout_alignTop="@id/students_auto_complete_layout"
                         android:layout_centerVertical="true"
-                        android:foregroundGravity="center_vertical" />
+                        android:foregroundGravity="center_vertical"
+                        bind:isVisible="@{viewModel.isLoadingStudents}" />
 
                 </RelativeLayout>
 
@@ -103,8 +109,8 @@
                     <Button
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:onClick="onAddCourseButtonClick"
-                        android:text="@string/action_add_course"
+                        android:onClick="onAddChatButtonClick"
+                        android:text='@{viewModel.data.type.equals(viewModel.data.Type.COURSE) ? @string/add_course : @string/add_group}'
                         bind:isVisible="@{!viewModel.isLoading}" />
 
                 </LinearLayout>

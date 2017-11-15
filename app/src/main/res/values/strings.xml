@@ -4,67 +4,44 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
-
-    <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="prompt_password_repeat">Repeat Password</string>
-    <string name="prompt_name">Name</string>
-    <string name="prompt_first_name">First Name</string>
-    <string name="prompt_last_name">Last Name</string>
-    <string name="prompt_description">Description</string>
-    <string name="prompt_message">Message</string>
-    <string name="action_login">Login</string>
-    <string name="action_logout">Logout</string>
-    <string name="action_forgot">Forgot</string>
-    <string name="action_forgot_password">Forgot Password</string>
-    <string name="action_reset_password">Reset Password</string>
-    <string name="action_sign_up">Sign Up</string>
-    <string name="action_update_profile">Update Profile</string>
-    <string name="action_sign_up_prompt">Don\'t have an account? Sign Up</string>
-    <string name="action_add_course">Add Course</string>
-    <string name="action_add_group">Add Group</string>
-    <string name="action_send">Send</string>
-    <string name="action_profile">Profile</string>
-    <string name="error_incorrect_login">Incorrect login information</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_passwords_must_match">Passwords must match</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="error_sign_up">Unable to create account</string>
-    <string name="error_course_create">Unable to create course</string>
-    <string name="error_sending_message">Unable to send message</string>
-    <string name="error_unknown">An unknown error has occurred</string>
-    <string name="success_login">Login successful</string>
-    <string name="success_sign_up">Account created successfully</string>
-    <string name="success_reset_password">A password reset email has been sent</string>
-    <string name="success_profile_update">Profile updated successfully</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-
-    <string name="chat">Chat</string>
+    <!-- Custom strings -->
+    <string name="account">Account</string>
+    <string name="add_course">Add Course</string>
+    <string name="add_group">Add Group</string>
     <string name="chats">Chats</string>
-    <string name="conversations">Conversations</string>
     <string name="course">Course</string>
+    <string name="course_created">Course created</string>
     <string name="courses">Courses</string>
-    <string name="group">Group</string>
+    <string name="description">Description</string>
+    <string name="dont_have_an_account_sign_up">Don\'t have an account? Sign Up</string>
+    <string name="email">Email</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="group_created">Group created</string>
     <string name="groups">Groups</string>
-    <string name="user">User</string>
-    <string name="users">Users</string>
-    <string name="student">Student</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="message">Message</string>
+    <string name="name">Name</string>
+    <string name="password">Password</string>
+    <string name="password_repeat">Repeat Password</string>
+    <string name="profile">Profile</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="send">Send</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="start_the_conversation">Start the conversation</string>
     <string name="students">Students</string>
-    <string name="instructor">Instructor</string>
-    <string name="faculty">Faculty</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-
-    <string name="feedback_no_courses">No Courses</string>
-    <string name="feedback_course_created">Course created</string>
-    <string name="feedback_group_created">Group created</string>
-
+    <string name="update_profile">Update Profile</string>
     <string name="you_dont_have_any_courses">You don\'t have any courses</string>
     <string name="you_dont_have_any_groups">You don\'t have any groups</string>
+
+    <!-- Validation Errors -->
+    <string name="error_field_required">This field is required</string>
+    <string name="error_fields_must_match">Fields must match</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_university_email_required">University email required</string>
+
+    <!-- Success Messages -->
+    <string name="success_reset_password">A password reset email has been sent</string>
+    <string name="success_profile_update">Profile updated successfully</string>
 </resources>

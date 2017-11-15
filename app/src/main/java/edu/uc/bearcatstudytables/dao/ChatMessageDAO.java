@@ -8,18 +8,14 @@ import com.google.firebase.database.DatabaseReference;
 
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 
-/**
- * Created by connorbowman on 10/19/17.
- */
-
 public class ChatMessageDAO implements IChatMessageDAO {
 
     public static DatabaseReference getReference() {
-        return ChatDAO.getReference().getParent().child("message");
+        return ChatDAO.getReference().child("message");
     }
 
     public static DatabaseReference getReference(String chatId) {
-        return getReference().child(chatId);
+        return getReference().orderByChild("chatId").equalTo(chatId).getRef();
     }
 
     /**
@@ -29,9 +25,9 @@ public class ChatMessageDAO implements IChatMessageDAO {
      * @param callback    Callback
      */
     @Override
-    public void create(String chatId, ChatMessageDTO chatMessage, final TaskCallback callback) {
+    public void create(ChatMessageDTO chatMessage, final DataAccess.TaskCallback callback) {
         callback.onStart();
-        getReference(chatMessage.getCourseId()).push().setValue(chatMessage)
+        getReference(chatMessage.getChatId()).push().setValue(chatMessage)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

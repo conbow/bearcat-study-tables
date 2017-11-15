@@ -4,11 +4,7 @@ import java.util.List;
 
 import edu.uc.bearcatstudytables.dto.UserDTO;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
-public interface IUserDAO extends IDataAccess {
+public interface IUserDAO {
 
     /**
      * Create a new user
@@ -16,14 +12,14 @@ public interface IUserDAO extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void create(UserDTO user, TaskCallback callback);
+    void create(UserDTO user, DataAccess.TaskCallback callback);
 
     /**
      * Fetch all users
      *
      * @param callback Callback
      */
-    void fetch(TaskDataCallback<List<UserDTO>> callback);
+    void fetchAll(DataAccess.TaskDataCallback<List<UserDTO>> callback);
 
     /**
      * Fetch single user with ID
@@ -31,7 +27,7 @@ public interface IUserDAO extends IDataAccess {
      * @param userId   User ID
      * @param callback Callback
      */
-    void fetch(String userId, UserDTO callback);
+    void fetchById(String userId, DataAccess.TaskDataCallback<UserDTO> callback);
 
     /**
      * Fetch all users that match
@@ -39,7 +35,7 @@ public interface IUserDAO extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void fetch(UserDTO user, TaskDataCallback<List<UserDTO>> callback);
+    void fetch(UserDTO user, DataAccess.TaskDataCallback<List<UserDTO>> callback);
 
     /**
      * Update a user
@@ -47,5 +43,5 @@ public interface IUserDAO extends IDataAccess {
      * @param user     User
      * @param callback Callback
      */
-    void update(UserDTO user, TaskCallback callback);
+    void update(UserDTO user, DataAccess.TaskCallback callback);
 }

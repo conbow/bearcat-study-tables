@@ -2,10 +2,6 @@ package edu.uc.bearcatstudytables.dao;
 
 import edu.uc.bearcatstudytables.dto.ChatDTO;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
 public class ChatDAOStub implements IChatDAO {
 
     /**
@@ -15,7 +11,7 @@ public class ChatDAOStub implements IChatDAO {
      * @param callback Callback
      */
     @Override
-    public void create(ChatDTO chat, TaskCallback callback) {
+    public void create(ChatDTO chat, DataAccess.TaskCallback callback) {
 
     }
 
@@ -26,7 +22,7 @@ public class ChatDAOStub implements IChatDAO {
      * @param callback Callback
      */
     @Override
-    public void update(ChatDTO chat, TaskCallback callback) {
+    public void update(ChatDTO chat, DataAccess.TaskCallback callback) {
 
     }
 }

@@ -6,16 +6,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 
 import edu.uc.bearcatstudytables.dto.ChatDTO;
-import edu.uc.bearcatstudytables.dto.UserDTO;
-
-import static android.R.attr.type;
-
-/**
- * Created by connorbowman on 10/19/17.
- */
 
 public class ChatDAO implements IChatDAO {
 
@@ -23,12 +15,12 @@ public class ChatDAO implements IChatDAO {
         return FirebaseDatabase.getInstance().getReference().child("chat");
     }
 
-    public static DatabaseReference getReferenceForType(ChatDTO.types type) {
+    public static DatabaseReference getReferenceForType(ChatDTO.Type type) {
         return FirebaseDatabase.getInstance().getReference().child("chat").child(type.name()
                 .toLowerCase());
     }
 
-    public static DatabaseReference getReferenceForId(ChatDTO.types type, String chatId) {
+    public static DatabaseReference getReferenceForId(ChatDTO.Type type, String chatId) {
         return getReference().child(chatId);
     }
 
@@ -44,9 +36,9 @@ public class ChatDAO implements IChatDAO {
      * @param callback Callback
      */
     @Override
-    public void create(ChatDTO chat, final TaskCallback callback) {
+    public void create(ChatDTO chat, final DataAccess.TaskCallback callback) {
         callback.onStart();
-        getReferenceForType(ChatDTO.types.valueOf(chat.getType())).push().setValue(chat)
+        getReferenceForType(ChatDTO.Type.valueOf(chat.getType().name())).push().setValue(chat)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -67,7 +59,7 @@ public class ChatDAO implements IChatDAO {
      * @param callback Callback
      */
     @Override
-    public void update(ChatDTO chat, TaskCallback callback) {
+    public void update(ChatDTO chat, DataAccess.TaskCallback callback) {
 
     }
 }

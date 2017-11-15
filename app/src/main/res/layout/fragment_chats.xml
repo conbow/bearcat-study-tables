@@ -22,7 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:id="@+id/no_chats_image"

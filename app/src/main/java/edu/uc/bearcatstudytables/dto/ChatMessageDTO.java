@@ -4,28 +4,24 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.Date;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
 @IgnoreExtraProperties
 public class ChatMessageDTO {
 
-    private String courseId;
+    public enum Type {TEXT, PHOTO, FILE}
+
+    private String chatId;
     private UserDTO from;
-    private String message;
+    private Type type;
+    private String message = "";
+    private String url = "";
     private Date date;
 
-    public ChatMessageDTO() {
-        this.message = "";
+    public String getChatId() {
+        return chatId;
     }
 
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+    public void setChatId(String courseId) {
+        this.chatId = courseId;
     }
 
     public UserDTO getFrom() {
@@ -36,12 +32,28 @@ public class ChatMessageDTO {
         this.from = from;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public String getMessage() {
         return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public Date getDate() {

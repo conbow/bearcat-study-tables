@@ -1,5 +1,6 @@
 package edu.uc.bearcatstudytables.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.databinding.ObservableField;
 import android.os.Bundle;
@@ -8,22 +9,18 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 
-import edu.uc.bearcatstudytables.BR;
 import edu.uc.bearcatstudytables.dto.UserDTO;
 import edu.uc.bearcatstudytables.service.ChatService;
 import edu.uc.bearcatstudytables.service.IChatService;
 import edu.uc.bearcatstudytables.service.IUserService;
 import edu.uc.bearcatstudytables.service.UserService;
 
-/**
- * Created by connorbowman on 10/4/17.
- */
-
+@SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements IUserService.AuthCallback {
 
     protected IUserService mUserService;
     protected IChatService mChatService;
-    protected final ObservableField<UserDTO> mCurrentUser = new ObservableField<>();
+    protected ObservableField<UserDTO> mCurrentUser = new ObservableField<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +34,14 @@ public class BaseActivity extends AppCompatActivity implements IUserService.Auth
         mCurrentUser.set(mUserService.getCurrentUser());
 
         // Set toolbar back button arrow if not a root activity
-        // OR if not LoginActivity (workaround for older API's that have issues with isTaskRoot)
+        // OR if not LoginActivity (workaround for older APIs that have issues with isTaskRoot)
         ActionBar actionBar = getSupportActionBar();
         if ((!isTaskRoot() && actionBar != null) && !(BaseActivity.this instanceof LoginActivity)) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
 
-        // Fix for vectors on older API's
+        // Fix for vectors on older APIs
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
@@ -86,11 +83,7 @@ public class BaseActivity extends AppCompatActivity implements IUserService.Auth
             ActivityCompat.finishAffinity(BaseActivity.this);
         }
 
-        // Set current user observable and notify observers
+        // Set current user observable (UserDTO will handle notifying observers)
         mCurrentUser.set(user);
-        synchronized (mCurrentUser) {
-            mCurrentUser.notifyAll();
-        }
-        mCurrentUser.notifyPropertyChanged(BR._all);
     }
 }

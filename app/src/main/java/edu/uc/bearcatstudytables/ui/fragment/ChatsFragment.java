@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Query;
 
 import edu.uc.bearcatstudytables.R;
@@ -23,18 +22,15 @@ import edu.uc.bearcatstudytables.ui.activity.ChatActivity;
 
 public class ChatsFragment extends BaseFragment {
 
-    private static final String TAG = "ChatsFragment";
-
     private static final String KEY_TYPE = "TYPE";
 
-    private String mChatType;
+    private ChatDTO.Type mChatType;
     private FragmentChatsBinding mBinding;
-    private FirebaseRecyclerAdapter mRecyclerAdapter;
 
     public ChatsFragment() {
     }
 
-    public static ChatsFragment newInstance(ChatDTO.types type) {
+    public static ChatsFragment newInstance(ChatDTO.Type type) {
         ChatsFragment fragment = new ChatsFragment();
         Bundle bundle = new Bundle();
         bundle.putString(KEY_TYPE, type.name());
@@ -45,9 +41,11 @@ public class ChatsFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
 
-        mChatType = bundle.getString(KEY_TYPE, ChatDTO.types.COURSE.toString());
+        // Get chat type from arguments
+        Bundle bundle = getArguments();
+        String chatType = bundle.getString(KEY_TYPE, ChatDTO.Type.COURSE.toString());
+        mChatType = ChatDTO.Type.valueOf(chatType);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class ChatsFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         mBinding = FragmentChatsBinding.inflate(inflater, container, false);
 
-        if (mChatType.equals(ChatDTO.types.GROUP.toString())) {
+        if (mChatType.equals(ChatDTO.Type.GROUP)) {
             mBinding.noChatsText.setText(R.string.you_dont_have_any_groups);
             mBinding.noChatsImage.setImageResource(R.drawable.ic_menu_people);
         }
@@ -71,8 +69,8 @@ public class ChatsFragment extends BaseFragment {
                 DividerItemDecoration.VERTICAL);
         mBinding.chatsList.addItemDecoration(dividerItemDecoration);
 
-        Query query = ChatDAO.getReferenceForType(ChatDTO.types.valueOf(mChatType))
-                .orderByChild("members/" + FirebaseAuth.getInstance().getCurrentUser().getUid())
+        Query query = ChatDAO.getReferenceForType(ChatDTO.Type.valueOf(mChatType.name()))
+                .orderByChild("members/" + mCurrentUser.get().getId())
                 .equalTo(true);
 
         FirebaseRecyclerOptions<ChatDTO> options =
@@ -81,7 +79,8 @@ public class ChatsFragment extends BaseFragment {
                         .setLifecycleOwner(this)
                         .build();
 
-        mRecyclerAdapter = new FirebaseRecyclerAdapter<ChatDTO, ChatGroupViewHolder>(options) {
+        final FirebaseRecyclerAdapter recyclerAdapter = new FirebaseRecyclerAdapter
+                <ChatDTO, ChatGroupViewHolder>(options) {
             @Override
             public ChatGroupViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 return new ChatGroupViewHolder(LayoutInflater.from(parent.getContext())
@@ -95,9 +94,10 @@ public class ChatsFragment extends BaseFragment {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(getActivity(), ChatActivity.class);
-                        intent.putExtra(ChatActivity.KEY_CHAT_ID, mRecyclerAdapter
-                                .getRef(viewHolder.getAdapterPosition()).getKey());
+                        intent.putExtra(ChatActivity.KEY_CHAT_ID,
+                                getRef(viewHolder.getAdapterPosition()).getKey());
                         intent.putExtra(ChatActivity.KEY_CHAT_NAME, model.getName());
+                        intent.putExtra(ChatActivity.KEY_CHAT_DESCRIPTION, model.getDescription());
                         startActivity(intent);
                     }
                 });
@@ -111,7 +111,7 @@ public class ChatsFragment extends BaseFragment {
             }
         };
 
-        mBinding.chatsList.setAdapter(mRecyclerAdapter);
+        mBinding.chatsList.setAdapter(recyclerAdapter);
     }
 
     private static class ChatGroupViewHolder extends RecyclerView.ViewHolder {

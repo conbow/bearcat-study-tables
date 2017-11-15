@@ -1,15 +1,11 @@
 package edu.uc.bearcatstudytables.dao;
 
-/**
- * Created by connorbowman on 10/19/17.
- */
-
-public interface IDataAccess {
+public class DataAccess {
 
     /**
      * Callback for a simple task with no data
      */
-    interface TaskCallback {
+    public interface TaskCallback {
 
         void onStart();
 
@@ -25,14 +21,8 @@ public interface IDataAccess {
      *
      * @param <T> Data type to be returned
      */
-    interface TaskDataCallback<T> {
-
-        void onStart();
-
-        void onComplete();
+    public interface TaskDataCallback<T> extends TaskCallback {
 
         void onSuccess(T data);
-
-        void onFailure(Exception e);
     }
 }

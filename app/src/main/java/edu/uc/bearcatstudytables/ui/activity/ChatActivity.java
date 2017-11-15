@@ -17,7 +17,7 @@ import java.util.Date;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.ChatMessageDAO;
-import edu.uc.bearcatstudytables.dao.IDataAccess;
+import edu.uc.bearcatstudytables.dao.DataAccess;
 import edu.uc.bearcatstudytables.databinding.ActivityChatBinding;
 import edu.uc.bearcatstudytables.databinding.ListItemChatMessageBinding;
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
@@ -25,51 +25,59 @@ import edu.uc.bearcatstudytables.dto.UserDTO;
 
 public class ChatActivity extends BaseActivity {
 
-    private static final String TAG = "ChatActivity";
-
     public final static String KEY_CHAT_ID = "CHAT_ID";
     public final static String KEY_CHAT_NAME = "CHAT_NAME";
+    public final static String KEY_CHAT_DESCRIPTION = "CHAT_DESCRIPTION";
 
-    private String mCourseId;
     private ActivityChatBinding mBinding;
     private ChatMessageDTO mChatMessage;
-    private RecyclerView mRecyclerView;
-    private FirebaseRecyclerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(getIntent().getStringExtra(KEY_CHAT_NAME));
+
+        // Get chat information from intent
+        String chatId = getIntent().getStringExtra(KEY_CHAT_ID);
+        String chatName = getIntent().getStringExtra(KEY_CHAT_NAME);
+        String chatDescription = getIntent().getStringExtra(KEY_CHAT_DESCRIPTION);
+
+        // Set title and subtitle
+        setTitle(chatName);
+        if (getSupportActionBar() != null && !chatDescription.isEmpty())
+            getSupportActionBar().setSubtitle(chatDescription);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_chat);
 
+        // Bind chat message
         mChatMessage = new ChatMessageDTO();
+        mChatMessage.setChatId(chatId);
+        mChatMessage.setFrom(mCurrentUser.get());
         mBinding.setChatMessage(mChatMessage);
-        mCourseId = getIntent().getStringExtra(KEY_CHAT_ID);
+        mBinding.executePendingBindings();
+
         initializeChatMessageList();
     }
 
+    /**
+     * Initialize the chat messages list such as setting up the RecyclerView
+     */
     private void initializeChatMessageList() {
-
-        Query query = ChatMessageDAO.getReference(mCourseId).limitToLast(50);
-
+        // Set options for Firebase UI RecyclerView
+        Query query = ChatMessageDAO.getReference(mChatMessage.getChatId()).limitToLast(50);
         FirebaseRecyclerOptions<ChatMessageDTO> options =
                 new FirebaseRecyclerOptions.Builder<ChatMessageDTO>()
                         .setQuery(query, ChatMessageDTO.class)
+                        .setLifecycleOwner(this)
                         .build();
 
-        mAdapter = new FirebaseRecyclerAdapter<ChatMessageDTO, ChatMessageViewHolder>(options) {
+        // Create RecyclerAdapter
+        FirebaseRecyclerAdapter recyclerAdapter = new FirebaseRecyclerAdapter<ChatMessageDTO,
+                ChatMessageViewHolder>(options) {
             @Override
             public ChatMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
                 ListItemChatMessageBinding binding = ListItemChatMessageBinding
                         .inflate(layoutInflater, parent, false);
                 return new ChatMessageViewHolder(binding);
-                //binding.setUser();
-                //return ListItemChatMessageBinding.inflate(LayoutInflater.from(parent.getContext());
-                /*
-                return new ChatMessageViewHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_chat_message, parent, false));
-                        */
             }
 
             @Override
@@ -80,30 +88,40 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onDataChanged() {
+                mBinding.progressBar.setVisibility(View.GONE);
+                mBinding.noChatMessages.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 scrollToBottom();
             }
         };
 
-        mRecyclerView = findViewById(R.id.course_chat_message_list);
+        // Setup RecyclerView and set adapter
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setSmoothScrollbarEnabled(true);
         linearLayoutManager.setStackFromEnd(true);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+        mBinding.chatMessageList.setLayoutManager(linearLayoutManager);
+        mBinding.chatMessageList.setAdapter(recyclerAdapter);
     }
 
+    /**
+     * Function to smoothly scroll to the bottom of the chat messages list
+     */
     private void scrollToBottom() {
-        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
+        mBinding.chatMessageList.smoothScrollToPosition(mBinding.chatMessageList.getAdapter()
+                .getItemCount());
     }
 
+    /**
+     * Send chat message button click handler
+     * Validates input and sends data to service
+     *
+     * @param view View
+     */
     public void onSendMessageButtonClick(final View view) {
-        // Check input validation and attempt to send message
+        // Check to make sure message isn't empty and attempt to send message
         if (!mChatMessage.getMessage().isEmpty()) {
             mChatMessage.setDate(new Date());
-            mChatMessage.setCourseId(mCourseId);
-            mChatMessage.setFrom(mCurrentUser.get());
 
-            mChatService.sendMessage(mCourseId, mChatMessage, new IDataAccess.TaskCallback() {
+            mChatService.sendMessage(mChatMessage, new DataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
 
@@ -116,9 +134,7 @@ public class ChatActivity extends BaseActivity {
 
                 @Override
                 public void onSuccess() {
-                    mBinding.chatMessage.setText("");
-                    // I shouldn't have to do this, the adapter's onDataChanged fn should be
-                    // called, right? But it's not
+                    mBinding.inputChatMessage.setText("");
                     scrollToBottom();
                 }
 
@@ -131,32 +147,30 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAdapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mAdapter.stopListening();
+    /**
+     * TODO
+     * Attach a file to chat button click handler
+     *
+     * @param view View
+     */
+    public void onAttachFileButtonClick(final View view) {
+        throw new UnsupportedOperationException();
     }
 
     private static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
 
-        private ListItemChatMessageBinding mBinding;
+        private ListItemChatMessageBinding mListItemBinding;
 
-        private ChatMessageViewHolder(ListItemChatMessageBinding binding) {
-            super(binding.getRoot());
-            mBinding = binding;
+        private ChatMessageViewHolder(ListItemChatMessageBinding listItemBinding) {
+            super(listItemBinding.getRoot());
+            mListItemBinding = listItemBinding;
         }
 
         private void bind(UserDTO currentUser, ChatMessageDTO chatMessage) {
             boolean isFromCurrentUser = chatMessage.getFrom().getEmail().equals(currentUser
                     .getEmail());
-            mBinding.setChatMessage(chatMessage);
-            mBinding.setIsFromCurrentUser(isFromCurrentUser);
+            mListItemBinding.setChatMessage(chatMessage);
+            mListItemBinding.setIsFromCurrentUser(isFromCurrentUser);
         }
     }
 }

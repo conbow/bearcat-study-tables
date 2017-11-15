@@ -2,7 +2,7 @@ package edu.uc.bearcatstudytables.dao;
 
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 
-public interface IChatMessageDAO {
+public class ChatMessageDAOStub implements IChatMessageDAO {
 
     /**
      * Create a new chat message
@@ -10,5 +10,8 @@ public interface IChatMessageDAO {
      * @param chatMessage Chat Message
      * @param callback    Callback
      */
-    void create(ChatMessageDTO chatMessage, DataAccess.TaskCallback callback);
+    @Override
+    public void create(ChatMessageDTO chatMessage, DataAccess.TaskCallback callback) {
+
+    }
 }

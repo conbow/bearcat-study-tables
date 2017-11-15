@@ -8,16 +8,20 @@
             android:icon="@drawable/ic_menu_chat"
             android:title="@string/chats" />
     </group>
-    <group
-        android:id="@+id/drawer_menu_bottom"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_account_circle"
-            android:title="@string/action_profile" />
-        <item
-            android:id="@+id/nav_logout"
-            android:icon="@drawable/ic_menu_exit_to_app"
-            android:title="@string/action_logout" />
-    </group>
+    <item android:title="@string/account">
+        <menu>
+            <group
+                android:id="@+id/drawer_menu_bottom"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_profile"
+                    android:icon="@drawable/ic_menu_account_circle"
+                    android:title="@string/profile" />
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/ic_menu_exit_to_app"
+                    android:title="@string/logout" />
+            </group>
+        </menu>
+    </item>
 </menu>

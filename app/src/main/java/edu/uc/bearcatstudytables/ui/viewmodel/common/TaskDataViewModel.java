@@ -1,9 +1,5 @@
 package edu.uc.bearcatstudytables.ui.viewmodel.common;
 
-/**
- * Created by connorbowman on 10/13/17.
- */
-
 public class TaskDataViewModel<T> extends TaskViewModel {
 
     private T mData;

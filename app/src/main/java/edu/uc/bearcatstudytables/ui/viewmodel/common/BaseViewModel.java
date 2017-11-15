@@ -1,9 +1,5 @@
 package edu.uc.bearcatstudytables.ui.viewmodel.common;
 
-/**
- * Created by connorbowman on 10/11/17.
- */
-
 import android.arch.lifecycle.ViewModel;
 import android.databinding.Observable;
 import android.databinding.PropertyChangeRegistry;
@@ -16,6 +12,20 @@ import edu.uc.bearcatstudytables.BR;
  * See: https://stackoverflow.com/questions/44442251/viewmodel-and-data-binding
  */
 public class BaseViewModel extends ViewModel implements Observable {
+
+    private ValidationViewModel mValidation;
+
+    public BaseViewModel() {
+        mValidation = new ValidationViewModel();
+    }
+
+    public ValidationViewModel getValidation() {
+        return mValidation;
+    }
+
+    public void setValidation(ValidationViewModel validation) {
+        this.mValidation = validation;
+    }
 
     private final PropertyChangeRegistry mPropertyChangeRegistry = new PropertyChangeRegistry();
 

@@ -4,27 +4,23 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
 
-/**
- * Created by connorbowman on 10/3/17.
- */
-
 @IgnoreExtraProperties
 public class ChatDTO {
 
-    public enum types {COURSE, GROUP}
+    public enum Type {COURSE, GROUP}
 
-    private String name;
-    private String description;
-    private String type;
-    private HashMap<String, Boolean> members;
-    private HashMap<String, ChatMessageDTO> messages;
+    private Type type;
+    private String name = "";
+    private String description = "";
+    private HashMap<String, Boolean> members = new HashMap<>();
+    private HashMap<String, ChatMessageDTO> messages = new HashMap<>();
 
-    public ChatDTO() {
-        name = "";
-        description = "";
-        type = "";
-        members = new HashMap<>();
-        messages = new HashMap<>();
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public String getName() {
@@ -41,14 +37,6 @@ public class ChatDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public HashMap<String, Boolean> getMembers() {

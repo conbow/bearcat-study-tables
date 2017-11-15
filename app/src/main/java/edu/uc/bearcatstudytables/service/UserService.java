@@ -7,13 +7,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.List;
+
+import edu.uc.bearcatstudytables.dao.DataAccess;
 import edu.uc.bearcatstudytables.dao.IUserDAO;
 import edu.uc.bearcatstudytables.dao.UserDAO;
 import edu.uc.bearcatstudytables.dto.UserDTO;
-
-/**
- * Created by connorbowman on 10/3/17.
- */
 
 public class UserService implements IUserService {
 
@@ -45,8 +44,15 @@ public class UserService implements IUserService {
                 @Override
                 public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                     UserDTO user = UserDAO.bindToUser(firebaseAuth.getCurrentUser());
-                    setCurrentUser(user);
-                    authCallback.onAuthChanged(user);
+                    // Check for user name. Fix for problem where user is created and logged in
+                    // before name is actually saved
+                    if (user != null && user.getName() != null && !user.getName().isEmpty()) {
+                        setCurrentUser(user);
+                        authCallback.onAuthChanged(user);
+                    } else {
+                        setCurrentUser(null);
+                        authCallback.onAuthChanged(null);
+                    }
                 }
             };
         }
@@ -78,7 +84,7 @@ public class UserService implements IUserService {
      * @param callback Callback
      */
     @Override
-    public void login(UserDTO user, final TaskCallback callback) {
+    public void login(UserDTO user, final DataAccess.TaskCallback callback) {
         callback.onStart();
         mAuth.signInWithEmailAndPassword(user.getEmail(), user.getPassword())
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -129,8 +135,18 @@ public class UserService implements IUserService {
      * @param callback Callback
      */
     @Override
-    public void signUp(UserDTO user, TaskCallback callback) {
+    public void signUp(UserDTO user, DataAccess.TaskCallback callback) {
         mUserDAO.create(user, callback);
+    }
+
+    /**
+     * Fetch all users
+     *
+     * @param callback Callback
+     */
+    @Override
+    public void fetchAll(DataAccess.TaskDataCallback<List<UserDTO>> callback) {
+        mUserDAO.fetchAll(callback);
     }
 
     /**
@@ -140,7 +156,7 @@ public class UserService implements IUserService {
      * @param callback Callback
      */
     @Override
-    public void resetPassword(UserDTO user, final TaskCallback callback) {
+    public void resetPassword(UserDTO user, final DataAccess.TaskCallback callback) {
         callback.onStart();
         mAuth.sendPasswordResetEmail(user.getEmail())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -163,8 +179,16 @@ public class UserService implements IUserService {
      * @param callback Callback
      */
     @Override
-    public void updateProfile(UserDTO user, final TaskCallback callback) {
+    public void updateProfile(UserDTO user, DataAccess.TaskCallback callback) {
         mUserDAO.update(user, callback);
+        /*
+        callback.onStart();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mUserDAO.update(user, callback);
+            }
+        }, 10000);*/
     }
 
     /**

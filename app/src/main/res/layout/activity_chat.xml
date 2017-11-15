@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
-        <import type="android.view.View" />
-
         <variable
             name="chatMessage"
             type="edu.uc.bearcatstudytables.dto.ChatMessageDTO" />
+
     </data>
 
     <android.support.design.widget.CoordinatorLayout
@@ -22,8 +22,41 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminate="true" />
+
+            <LinearLayout
+                android:id="@+id/no_chat_messages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/course"
+                    android:tint="@android:color/darker_gray"
+                    app:srcCompat="@drawable/ic_menu_chat" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/start_the_conversation" />
+
+            </LinearLayout>
+
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/course_chat_message_list"
+                android:id="@+id/chat_message_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@+id/chat_controls"
@@ -46,12 +79,20 @@
                 android:paddingEnd="8dp"
                 android:paddingStart="8dp">
 
+                <ImageButton
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="onAttachFileButtonClick"
+                    android:tint="@color/colorAccent"
+                    app:srcCompat="@drawable/ic_menu_attach_file" />
+
                 <EditText
-                    android:id="@+id/chat_message"
+                    android:id="@+id/input_chat_message"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="@string/prompt_message"
+                    android:hint="@string/message"
                     android:imeOptions="actionSend|flagNoExtractUi"
                     android:inputType="text"
                     android:maxLines="1"
@@ -65,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|end"
                     android:onClick="onSendMessageButtonClick"
-                    android:text="@string/action_send" />
+                    android:text="@string/send" />
 
             </LinearLayout>
 

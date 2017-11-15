@@ -2,22 +2,22 @@ package edu.uc.bearcatstudytables.ui.util;
 
 import android.text.TextUtils;
 
-/**
- * Created by connorbowman on 10/4/17.
- */
-
 public class ValidationUtil {
 
-    // Via https://stackoverflow.com/a/7882950
+    public static final int MIN_PASSWORD_LENGTH = 8;
+
     public static boolean isValidEmail(CharSequence email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        // Via https://stackoverflow.com/a/7882950
+        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email)
+                .matches();
     }
 
-    public static boolean isUniversityEmail(String email) {
-        return email.endsWith("uc.edu") || email.endsWith("mail.uc.edu");
+    public static boolean isValidUniversityEmail(String email) {
+        return email.endsWith("uc.edu") || email.endsWith("mail.uc.edu")
+                || email.endsWith("ucmail.uc.edu");
     }
 
     public static boolean isValidPassword(String password) {
-        return password.length() >= 8;
+        return password.length() >= MIN_PASSWORD_LENGTH;
     }
 }

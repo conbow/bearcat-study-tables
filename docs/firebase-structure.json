@@ -1,5 +1,4 @@
 {
-  // https://firebase.google.com/docs/database/android/structure-data
   "chat": {
     "list": {
     },
