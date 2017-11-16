@@ -62,7 +62,7 @@ public class ChatActivity extends BaseActivity {
      */
     private void initializeChatMessageList() {
         // Set options for Firebase UI RecyclerView
-        Query query = ChatMessageDAO.getReference(mChatMessage.getChatId()).limitToLast(50);
+        Query query = ChatMessageDAO.getQueryForChatId(mChatMessage.getChatId()).limitToLast(50);
         FirebaseRecyclerOptions<ChatMessageDTO> options =
                 new FirebaseRecyclerOptions.Builder<ChatMessageDTO>()
                         .setQuery(query, ChatMessageDTO.class)

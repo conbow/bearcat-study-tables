@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 
 import edu.uc.bearcatstudytables.dto.ChatMessageDTO;
 
@@ -14,8 +15,8 @@ public class ChatMessageDAO implements IChatMessageDAO {
         return ChatDAO.getReference().child("message");
     }
 
-    public static DatabaseReference getReference(String chatId) {
-        return getReference().orderByChild("chatId").equalTo(chatId).getRef();
+    public static Query getQueryForChatId(String chatId) {
+        return getReference().orderByChild("chatId").equalTo(chatId);
     }
 
     /**
@@ -27,7 +28,7 @@ public class ChatMessageDAO implements IChatMessageDAO {
     @Override
     public void create(ChatMessageDTO chatMessage, final DataAccess.TaskCallback callback) {
         callback.onStart();
-        getReference(chatMessage.getChatId()).push().setValue(chatMessage)
+        getReference().push().setValue(chatMessage)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
