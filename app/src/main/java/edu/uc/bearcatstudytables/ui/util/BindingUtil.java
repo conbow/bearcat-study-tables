@@ -20,22 +20,26 @@ public class BindingUtil {
         view.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    @BindingAdapter(value = {"imageUrl", "imageData", "imagePlaceholder", "imageRenderCircle"},
-            requireAll = false)
+    @BindingAdapter(value = {"imageUrl", "imageData", "imagePlaceholder", "imageRenderCircle",
+            "imageNoCache"}, requireAll = false)
     public static void bindImage(ImageView imageView, String imageUrl, byte[] imageData,
-                                 Drawable imagePlaceholder, boolean imageRenderCircle) {
+                                 Drawable imagePlaceholder, boolean imageRenderCircle,
+                                 boolean imageNoCache) {
         RequestBuilder glide = Glide.with(imageView.getContext())
-                .load(imageData != null ? imageData : imageUrl)
-                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE));
-        if (imageRenderCircle) {
-            glide.apply(RequestOptions.centerCropTransform());
-            glide.apply(RequestOptions.circleCropTransform());
-        }
+                .load(imageData != null ? imageData : imageUrl);
+
+        if (imageRenderCircle)
+            glide.apply(RequestOptions.centerCropTransform())
+                    .apply(RequestOptions.circleCropTransform());
+        if (imageNoCache)
+            glide.apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE));
         if (imageData != null)
             glide.apply(RequestOptions.signatureOf(new ObjectKey(imageData)));
-        glide.apply(RequestOptions.placeholderOf(imagePlaceholder))
-                .apply(RequestOptions.errorOf(imagePlaceholder))
-                .into(imageView);
+        if (imagePlaceholder != null)
+            glide.apply(RequestOptions.placeholderOf(imagePlaceholder))
+                    .apply(RequestOptions.errorOf(imagePlaceholder));
+
+        glide.into(imageView);
     }
 
     @BindingAdapter(value = {"validate", "validator"})

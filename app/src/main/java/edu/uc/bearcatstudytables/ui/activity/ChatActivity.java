@@ -1,7 +1,6 @@
 package edu.uc.bearcatstudytables.ui.activity;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
@@ -166,23 +165,19 @@ public class ChatActivity extends BaseActivity {
 
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null,
-                    null);
-            cursor.moveToFirst();
+            // Create new chat message with photo file
+            ChatMessageDTO chatMessage = new ChatMessageDTO();
+            chatMessage.setChatId(mChatMessage.getChatId());
+            chatMessage.setFrom(mChatMessage.getFrom());
+            chatMessage.setType(ChatMessageDTO.Type.PHOTO);
+            chatMessage.setType(ChatMessageDTO.Type.PHOTO);
+            chatMessage.setLocalFileUri(selectedImage);
 
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();
-
-            // Send chat message with picture
-            mChatMessage.setType(ChatMessageDTO.Type.PHOTO);
-            mChatMessage.setLocalFileUri(selectedImage);
-            mChatService.sendMessage(mChatMessage, new DataAccess.TaskCallback() {
+            mChatService.sendMessage(chatMessage, new DataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
-                    
+
                 }
 
                 @Override
@@ -215,8 +210,9 @@ public class ChatActivity extends BaseActivity {
         private void bind(UserDTO currentUser, ChatMessageDTO chatMessage) {
             boolean isFromCurrentUser = chatMessage.getFrom().getEmail().equals(currentUser
                     .getEmail());
-            mListItemBinding.setChatMessage(chatMessage);
             mListItemBinding.setIsFromCurrentUser(isFromCurrentUser);
+            mListItemBinding.setChatMessage(chatMessage);
+            mListItemBinding.executePendingBindings();
         }
     }
 }
