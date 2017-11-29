@@ -1,5 +1,8 @@
 package edu.uc.bearcatstudytables.dto;
 
+import android.net.Uri;
+
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.Date;
@@ -13,7 +16,8 @@ public class ChatMessageDTO {
     private UserDTO from;
     private Type type;
     private String message = "";
-    private String url = "";
+    private Uri localFileUri;
+    private String fileUrl = "";
     private Date date;
 
     public String getChatId() {
@@ -48,12 +52,21 @@ public class ChatMessageDTO {
         this.message = message;
     }
 
-    public String getUrl() {
-        return url;
+    @Exclude
+    public Uri getLocalFileUri() {
+        return localFileUri;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setLocalFileUri(Uri localFileUri) {
+        this.localFileUri = localFileUri;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     public Date getDate() {

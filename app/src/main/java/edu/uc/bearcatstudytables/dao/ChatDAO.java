@@ -24,11 +24,6 @@ public class ChatDAO implements IChatDAO {
         return getReference().child(chatId);
     }
 
-    /*
-    public static Query getQueryForType(UserDTO.types type) {
-        return getReference(type).orderByChild("type").equalTo(type);
-    }*/
-
     /**
      * Create a new chat (course or group)
      *

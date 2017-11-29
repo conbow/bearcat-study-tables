@@ -3,7 +3,6 @@ package edu.uc.bearcatstudytables.ui.activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -13,13 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.Query;
-
-import java.util.Date;
 
 import edu.uc.bearcatstudytables.R;
 import edu.uc.bearcatstudytables.dao.ChatMessageDAO;
@@ -127,8 +123,6 @@ public class ChatActivity extends BaseActivity {
     public void onSendMessageButtonClick(final View view) {
         // Check to make sure message isn't empty and attempt to send message
         if (!mChatMessage.getMessage().isEmpty()) {
-            mChatMessage.setDate(new Date());
-
             mChatService.sendMessage(mChatMessage, new DataAccess.TaskCallback() {
                 @Override
                 public void onStart() {
@@ -170,20 +164,42 @@ public class ChatActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
+        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-            Cursor cursor = getContentResolver().query(selectedImage,
-                    filePathColumn, null, null, null);
+            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null,
+                    null);
             cursor.moveToFirst();
 
             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
-            // do something with the loaded picture
+            // Send chat message with picture
+            mChatMessage.setType(ChatMessageDTO.Type.PHOTO);
+            mChatMessage.setLocalFileUri(selectedImage);
+            mChatService.sendMessage(mChatMessage, new DataAccess.TaskCallback() {
+                @Override
+                public void onStart() {
+                    
+                }
 
+                @Override
+                public void onComplete() {
+
+                }
+
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+
+                }
+            });
         }
     }
 

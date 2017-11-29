@@ -25,13 +25,12 @@ public class BindingUtil {
     public static void bindImage(ImageView imageView, String imageUrl, byte[] imageData,
                                  Drawable imagePlaceholder, boolean imageRenderCircle) {
         RequestBuilder glide = Glide.with(imageView.getContext())
-                .asBitmap()
                 .load(imageData != null ? imageData : imageUrl)
-                .apply(RequestOptions
-                        .centerCropTransform()
-                        .diskCacheStrategy(DiskCacheStrategy.NONE));
-        if (imageRenderCircle)
+                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE));
+        if (imageRenderCircle) {
+            glide.apply(RequestOptions.centerCropTransform());
             glide.apply(RequestOptions.circleCropTransform());
+        }
         if (imageData != null)
             glide.apply(RequestOptions.signatureOf(new ObjectKey(imageData)));
         glide.apply(RequestOptions.placeholderOf(imagePlaceholder))
