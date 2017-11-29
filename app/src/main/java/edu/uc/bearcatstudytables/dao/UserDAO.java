@@ -111,7 +111,7 @@ public class UserDAO implements IUserDAO {
      */
     private void updateUserChatMessages(final UserDTO user) {
         ChatMessageDAO.getReference().orderByChild("from/id").equalTo(user.getId())
-                .addValueEventListener(new ValueEventListener() {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot chatMessageDataSnapshot : dataSnapshot.getChildren()) {
@@ -284,7 +284,7 @@ public class UserDAO implements IUserDAO {
                                             .build()), false);
                         }
                     });
-            taskBatch.taskCount++;
+            taskBatch.incTaskCount();
             taskBatch.addTask(uploadTask);
         }
 
@@ -299,9 +299,18 @@ public class UserDAO implements IUserDAO {
             taskBatch.addTask(firebaseUser.updateEmail(user.getEmail()));
         }
 
-        // If anything was updated copy user to the database
+        // If anything was changed we want to copy the user to the database at the end
         if (taskBatch.getTaskCount() > 0) {
-            taskBatch.addTask(copyUserToDatabaseTask(user));
+            final int taskCount = taskBatch.getTaskCount();
+            taskBatch.addObserver(new Observer() {
+                @Override
+                public void update(Observable observable, Object o) {
+                    if (taskBatch.getCompletedTaskCount() == taskCount) {
+                        taskBatch.addTask(copyUserToDatabaseTask(user), false);
+                    }
+                }
+            });
+            taskBatch.incTaskCount();
         }
 
         // Update password if it changed (if it's set, it will be changed)

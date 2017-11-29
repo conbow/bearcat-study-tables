@@ -38,6 +38,7 @@
                     android:onClick="onProfilePhotoChangeButtonClick"
                     android:scaleType="fitCenter"
                     bind:imageData="@{viewModel.user.photo}"
+                    bind:imageNoCache="@{true}"
                     bind:imagePlaceholder="@{@drawable/ic_account_circle_gray}"
                     bind:imageRenderCircle="@{true}"
                     bind:imageUrl="@{viewModel.user.photoUrl}" />

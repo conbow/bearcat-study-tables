@@ -25,6 +25,7 @@
             android:layout_height="64dp"
             android:contentDescription="@string/profile"
             android:scaleType="fitCenter"
+            bind:imageNoCache="@{true}"
             bind:imagePlaceholder="@{@drawable/ic_account_circle}"
             bind:imageRenderCircle="@{true}"
             bind:imageUrl="@{viewModel.currentUser.photoUrl}" />

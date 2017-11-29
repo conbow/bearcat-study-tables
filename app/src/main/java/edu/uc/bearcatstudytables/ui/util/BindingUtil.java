@@ -1,5 +1,6 @@
 package edu.uc.bearcatstudytables.ui.util;
 
+import android.annotation.SuppressLint;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -9,9 +10,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 
 import edu.uc.bearcatstudytables.ui.viewmodel.common.ValidationViewModel;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class BindingUtil {
 
@@ -25,8 +29,11 @@ public class BindingUtil {
     public static void bindImage(ImageView imageView, String imageUrl, byte[] imageData,
                                  Drawable imagePlaceholder, boolean imageRenderCircle,
                                  boolean imageNoCache) {
+        @SuppressLint("Range")
         RequestBuilder glide = Glide.with(imageView.getContext())
-                .load(imageData != null ? imageData : imageUrl);
+                .load(imageData != null ? imageData : imageUrl)
+                .transition(withCrossFade())
+                .apply(RequestOptions.overrideOf(Target.SIZE_ORIGINAL));
 
         if (imageRenderCircle)
             glide.apply(RequestOptions.centerCropTransform())
